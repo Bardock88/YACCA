@@ -1,6 +1,7 @@
 package com.evandhardspace.yacca.plugins
 
 import com.evandhardspace.yacca.data.user.UserDataSource
+import com.evandhardspace.yacca.routes.deleteUser
 import com.evandhardspace.yacca.routes.signIn
 import com.evandhardspace.yacca.routes.signUp
 import com.evandhardspace.yacca.security.hashing.HashingService
@@ -29,6 +30,9 @@ fun Application.configureRouting(
             userDataSource = userDataSource,
             hashingService = hashingService,
             tokenService = tokenService,
+        )
+        deleteUser(
+            userDataSource = userDataSource,
         )
         secret()
 
