@@ -1,7 +1,14 @@
 package com.evandhardspace.yacca.data.currency
 
 import com.evandhardspace.yacca.data.response.CurrencyResponse
-import com.evandhardspace.yacca.data.user.UserDataSource
+import com.evandhardspace.yacca.db.FavoriteCurrencies
+import org.jetbrains.exposed.exceptions.ExposedSQLException
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 interface CurrencyDataSource {
@@ -15,34 +22,49 @@ interface CurrencyDataSource {
     suspend fun getFavouriteCurrencies(userId: UUID): List<CurrencyResponse>?
 }
 
-//todo migrate to db
-class InMemoryCurrencyDataSource(
+class DefaultCurrencyDataSource(
     private val currencyService: CurrencyService,
-    private val userDataSource: UserDataSource,
 ) : CurrencyDataSource {
     override suspend fun allCurrencies(): List<CurrencyResponse> = currencyService
         .allCurrencies()
         .data.map(CurrencyResource::asResponse)
 
-    private val favouriteCurrencies: MutableMap<UUID, MutableSet<String>> = mutableMapOf()
-
-    override suspend fun addFavouriteCurrency(userId: UUID, currencyId: String): Boolean {
-        val user = userDataSource.getUser(userId) ?: return false
-
-        favouriteCurrencies[user.id]?.add(currencyId) ?: run {
-            favouriteCurrencies[user.id] = mutableSetOf(currencyId)
+    override suspend fun addFavouriteCurrency(userId: UUID, currencyId: String): Boolean = try {
+        transaction {
+            FavoriteCurrencies.insert {
+                it[FavoriteCurrencies.userId] = userId
+                it[FavoriteCurrencies.currencyId] = currencyId
+            }
         }
-        return true
+        true
+    } catch (e: ExposedSQLException) {
+        println("Error adding favorite: ${e.localizedMessage}") // todo add logging
+        false
     }
 
-    override suspend fun deleteFavouriteCurrency(userId: UUID, currencyId: String): Boolean {
-        val user = userDataSource.getUser(userId) ?: return false
-        return favouriteCurrencies[user.id]?.remove(currencyId) ?: false
+    override suspend fun deleteFavouriteCurrency(userId: UUID, currencyId: String): Boolean = try {
+        transaction {
+            FavoriteCurrencies.deleteWhere {
+                (FavoriteCurrencies.userId eq userId) and (FavoriteCurrencies.currencyId eq currencyId)
+            }
+        }
+        true
+    } catch (e: ExposedSQLException) {
+        println("Error removing favorite: ${e.localizedMessage}")
+        false
     }
 
     override suspend fun getFavouriteCurrencies(userId: UUID): List<CurrencyResponse>? {
-        val user = userDataSource.getUser(userId) ?: return null
-        val favouriteCurrenciesIds = favouriteCurrencies[user.id] ?: return emptyList()
+        val favouriteCurrenciesIds = try {
+            transaction {
+                FavoriteCurrencies.select { FavoriteCurrencies.userId eq userId }
+                    .map { it[FavoriteCurrencies.currencyId] }
+            }.toSet()
+        } catch (e: ExposedSQLException) {
+            println("Error getting favorite: ${e.localizedMessage}")
+            null
+        } ?: return null
+
         if (favouriteCurrenciesIds.isEmpty()) return emptyList()
         return currencyService.filteredCurrencies(favouriteCurrenciesIds)
             .data.map(CurrencyResource::asResponse)

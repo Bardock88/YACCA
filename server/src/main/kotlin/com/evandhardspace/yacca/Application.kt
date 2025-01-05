@@ -1,8 +1,9 @@
 package com.evandhardspace.yacca
 
 import com.evandhardspace.yacca.data.currency.CurrencyService
-import com.evandhardspace.yacca.data.currency.InMemoryCurrencyDataSource
-import com.evandhardspace.yacca.data.user.InMemoryUserDataSource
+import com.evandhardspace.yacca.data.currency.DefaultCurrencyDataSource
+import com.evandhardspace.yacca.data.user.DefaultUserDataSource
+import com.evandhardspace.yacca.db.initDatabase
 import com.evandhardspace.yacca.plugins.*
 import com.evandhardspace.yacca.security.hashing.SHA256HashingService
 import com.evandhardspace.yacca.security.token.JwtTokenService
@@ -14,6 +15,7 @@ import kotlin.time.Duration.Companion.days
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 fun Application.module() {
+    initDatabase()
     val tokenConfig = TokenConfig(
         issuer = environment.config.property("jwt.issuer").getString(),
         audience = environment.config.property("jwt.audience").getString(),
@@ -26,10 +28,9 @@ fun Application.module() {
     val hashingService = SHA256HashingService()
     val currencyService = CurrencyService(client = client)
 
-    val userDataSource = InMemoryUserDataSource()
-    val currencyDataSource = InMemoryCurrencyDataSource(
+    val userDataSource = DefaultUserDataSource()
+    val currencyDataSource = DefaultCurrencyDataSource(
         currencyService = currencyService,
-        userDataSource = userDataSource,
     )
 
     configureSecurity()

@@ -12,6 +12,7 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import java.util.*
 
 fun Route.signUp(
     hashingService: HashingService,
@@ -23,7 +24,7 @@ fun Route.signUp(
             return@post
         }
 
-        val areFieldsBlank = request.username.isBlank() || request.password.isBlank()
+        val areFieldsBlank = request.email.isBlank() || request.password.isBlank()
         val isPasswordToShort = request.password.length < 8
         if (areFieldsBlank || isPasswordToShort) {
             call.respond(HttpStatusCode.Conflict, "Field are blank or password is too short")
@@ -32,7 +33,8 @@ fun Route.signUp(
 
         val saltedHash = hashingService.generateSaltedHash(request.password)
         val user = User(
-            username = request.username,
+            id = UUID.randomUUID(),
+            email = request.email,
             hashedPassword = saltedHash.hash,
             salt = saltedHash.salt,
         )
@@ -58,7 +60,7 @@ fun Route.signIn(
             return@post
         }
 
-        val user = userDataSource.getUser(request.username)
+        val user = userDataSource.getUser(request.email)
 
         if (user == null) {
             call.respond(HttpStatusCode.Conflict, "Incorrect username or password")

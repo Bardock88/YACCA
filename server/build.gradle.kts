@@ -29,6 +29,12 @@ dependencies {
     implementation(libs.ktor.client.serialization)
     implementation(libs.ktor.client.contentNegotiation)
 
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.dao)
+    implementation(libs.exposed.datetime)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.postgresql)
+
     implementation(libs.commons.codec)
 
     testImplementation(libs.kotlin.test.junit)
