@@ -42,7 +42,7 @@ class InMemoryCurrencyDataSource(
 
     override suspend fun getFavouriteCurrencies(userId: UUID): List<CurrencyResponse>? {
         val user = userDataSource.getUser(userId) ?: return null
-        val favouriteCurrenciesIds = favouriteCurrencies[user.id] ?: return null
+        val favouriteCurrenciesIds = favouriteCurrencies[user.id] ?: return emptyList()
         if (favouriteCurrenciesIds.isEmpty()) return emptyList()
         return currencyService.filteredCurrencies(favouriteCurrenciesIds)
             .data.map(CurrencyResource::asResponse)
