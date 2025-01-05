@@ -8,10 +8,10 @@ import com.evandhardspace.yacca.routes.signIn
 import com.evandhardspace.yacca.routes.signUp
 import com.evandhardspace.yacca.security.hashing.HashingService
 import com.evandhardspace.yacca.security.token.TokenService
+import com.evandhardspace.yacca.utils.userId
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
@@ -48,9 +48,7 @@ fun Application.configureRouting(
 private fun Route.secret() {
     authenticate {
         get("secret") {
-            val principal = call.principal<JWTPrincipal>()
-            val userId = principal?.getClaim("userId", String::class)
-            if (userId == null) {
+            val userId = call.userId ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
             }

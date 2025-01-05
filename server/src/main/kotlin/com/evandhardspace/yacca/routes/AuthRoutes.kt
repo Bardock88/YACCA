@@ -58,7 +58,7 @@ fun Route.signIn(
             return@post
         }
 
-        val user = userDataSource.getUserByUsername(request.username)
+        val user = userDataSource.getUser(request.username)
 
         if (user == null) {
             call.respond(HttpStatusCode.Conflict, "Incorrect username or password")

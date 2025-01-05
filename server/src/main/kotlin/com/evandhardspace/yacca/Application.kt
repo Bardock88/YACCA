@@ -1,7 +1,7 @@
 package com.evandhardspace.yacca
 
 import com.evandhardspace.yacca.data.currency.CurrencyService
-import com.evandhardspace.yacca.data.currency.DefaultCurrencyDataSource
+import com.evandhardspace.yacca.data.currency.InMemoryCurrencyDataSource
 import com.evandhardspace.yacca.data.user.InMemoryUserDataSource
 import com.evandhardspace.yacca.plugins.*
 import com.evandhardspace.yacca.security.hashing.SHA256HashingService
@@ -22,12 +22,15 @@ fun Application.module() {
     )
     val client = buildHttpClient()
 
-    val tokenService = JwtTokenService(tokenConfig)
+    val tokenService = JwtTokenService(config = tokenConfig)
     val hashingService = SHA256HashingService()
-    val currencyService = CurrencyService(client)
+    val currencyService = CurrencyService(client = client)
 
     val userDataSource = InMemoryUserDataSource()
-    val currencyDataSource = DefaultCurrencyDataSource(currencyService)
+    val currencyDataSource = InMemoryCurrencyDataSource(
+        currencyService = currencyService,
+        userDataSource = userDataSource,
+    )
 
     configureSecurity()
     configureMonitoring()

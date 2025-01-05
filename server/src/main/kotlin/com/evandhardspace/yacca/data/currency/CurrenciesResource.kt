@@ -3,7 +3,7 @@ package com.evandhardspace.yacca.data.currency
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CurrenciesResponse(
+data class CurrenciesResource(
     val data: List<CurrencyResource>
 )
 

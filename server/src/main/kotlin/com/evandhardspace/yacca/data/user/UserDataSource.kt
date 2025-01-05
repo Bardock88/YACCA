@@ -4,7 +4,9 @@ import java.util.UUID
 
 interface UserDataSource {
 
-    suspend fun getUserByUsername(username: String): User?
+    suspend fun getUser(username: String): User?
+
+    suspend fun getUser(id: UUID): User?
 
     suspend fun insertUser(user: User): Boolean
 
@@ -15,8 +17,11 @@ interface UserDataSource {
 class InMemoryUserDataSource : UserDataSource {
     private val users = mutableListOf<User>()
 
-    override suspend fun getUserByUsername(username: String): User? =
+    override suspend fun getUser(username: String): User? =
         users.firstOrNull { it.username == username }
+
+    override suspend fun getUser(id: UUID): User? =
+        users.firstOrNull { it.id == id }
 
     override suspend fun insertUser(user: User): Boolean {
         if(users.any { it.username == user.username }) return false
