@@ -1,6 +1,8 @@
 package com.evandhardspace.yacca.plugins
 
+import com.evandhardspace.yacca.data.currency.CurrencyDataSource
 import com.evandhardspace.yacca.data.user.UserDataSource
+import com.evandhardspace.yacca.routes.currencies
 import com.evandhardspace.yacca.routes.deleteUser
 import com.evandhardspace.yacca.routes.signIn
 import com.evandhardspace.yacca.routes.signUp
@@ -15,8 +17,9 @@ import io.ktor.server.routing.*
 
 fun Application.configureRouting(
     hashingService: HashingService,
-    userDataSource: UserDataSource,
     tokenService: TokenService,
+    userDataSource: UserDataSource,
+    currencyDataSource: CurrencyDataSource,
 ) {
     routing {
         get("/") {
@@ -34,8 +37,10 @@ fun Application.configureRouting(
         deleteUser(
             userDataSource = userDataSource,
         )
+        currencies(
+            currencyDataSource = currencyDataSource,
+        )
         secret()
-
     }
 }
 
