@@ -10,5 +10,5 @@ plugins {
 }
 
 task("stage") {
-    dependsOn("buildFatJar")  // Ensure it depends on your fat JAR task
+    dependsOn("server:buildFatJar")  // Ensure it depends on your fat JAR task
 }
