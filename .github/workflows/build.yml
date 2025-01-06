@@ -43,29 +43,32 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build  # This makes sure that the build job runs before the deploy job
-
     steps:
-      # Step 1: Download the artifact from the previous job
-      - name: Download fat JAR artifact
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+
+      # Step 1: Download Fat JAR Artifact
+      - name: Download Fat JAR Artifact
         uses: actions/download-artifact@v3
         with:
           name: fat-jar
+          path: ./server/build/libs  # Make sure this matches the artifact upload path
 
-      # Step 2: Set up Heroku CLI
+      # Step 2: Install Heroku CLI
       - name: Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
-          heroku --version
 
-      # Step 3: Authenticate with Heroku
-      - name: Heroku authentication
-        run: |
-          echo "machine api.heroku.com" > ~/.netrc
-          echo "  login ${{ secrets.HEROKU_EMAIL }}" >> ~/.netrc
-          echo "  password ${{ secrets.HEROKU_API_KEY }}" >> ~/.netrc
-
-      # Step 4: Deploy to Heroku
+      # Step 3: Deploy to Heroku
       - name: Deploy to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          heroku deploy:jar server/build/libs/server-all.jar --app ${{ secrets.HEROKU_APP_NAME }}
+          echo $HEROKU_API_KEY | heroku auth:token
+          # Assuming you have a Procfile with the correct `web` command for Heroku
+          heroku deploy:jar ./server/build/libs/server-all.jar --app your-app-name
