@@ -8,3 +8,7 @@ plugins {
     alias(libs.plugins.kotlinJvm) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
 }
+
+task("stage") {
+    dependsOn("buildFatJar")  // Ensure it depends on your fat JAR task
+}
