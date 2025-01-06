@@ -4,23 +4,29 @@ import com.typesafe.config.ConfigFactory
 import io.ktor.server.config.*
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
+import java.net.URI
 
 fun initDatabase() {
     val dbConfig = HoconApplicationConfig(ConfigFactory.load()).config("ktor.database")
+    val uri = URI(dbConfig.property("uri").getString())
+    val userInfo = uri.userInfo.split(":")
+    val user = userInfo[0]
+    val password = userInfo[1]
+    val host = uri.host
+    val port = uri.port
+    val database = uri.path.split("/")[1]
+    val jdbcUrl = "jdbc:postgresql://$host:$port/$database"
+
     Flyway.configure()
-        .dataSource(
-            dbConfig.property("url").getString(),
-            dbConfig.property("user").getString(),
-            dbConfig.property("password").getString(),
-        )
+        .dataSource(jdbcUrl, user, password)
         .locations("classpath:db/migration")
         .load()
         .migrate()
 
     Database.connect(
-        url = dbConfig.property("url").getString(),
+        url = jdbcUrl,
         driver = dbConfig.property("driver").getString(),
-        user = dbConfig.property("user").getString(),
-        password = dbConfig.property("password").getString()
+        user = user,
+        password = password
     )
 }
