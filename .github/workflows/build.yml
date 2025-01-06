@@ -59,18 +59,21 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: fat-jar
-          path: ./server/build/libs  # Make sure this matches the artifact upload path
+          path: ./server/build/libs
 
       # Step 2: Install Heroku CLI
       - name: Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
 
-      # Step 3: Deploy to Heroku
-      - name: Deploy to Heroku
+      # Step 3: Authenticate with Heroku
+      - name: Heroku Login
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          echo $HEROKU_API_KEY | heroku auth:token
-          # Assuming you have a Procfile with the correct `web` command for Heroku
+          echo $HEROKU_API_KEY | heroku auth:token  # Log in using the Heroku API key
+
+      # Step 4: Deploy to Heroku
+      - name: Deploy to Heroku
+        run: |
           heroku deploy:jar ./server/build/libs/server-all.jar --app your-app-name
