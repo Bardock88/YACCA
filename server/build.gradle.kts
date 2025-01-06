@@ -34,6 +34,7 @@ dependencies {
     implementation(libs.exposed.datetime)
     implementation(libs.exposed.jdbc)
     implementation(libs.postgresql)
+    implementation(libs.flyway)
 
     implementation(libs.commons.codec)
 
