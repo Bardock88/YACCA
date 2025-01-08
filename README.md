@@ -1,3 +1,5 @@
+# Yet Another Crypto-Currency Application
+
 This is a Kotlin Multiplatform project targeting Android, iOS, Server.
 
 * `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
