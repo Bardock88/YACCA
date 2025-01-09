@@ -3,7 +3,7 @@ package com.evandhardspace.yacca.features.home
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -19,7 +19,7 @@ fun HomeScreen(
         modifier = Modifier.statusBarsPadding(),
     ) {
         items(state) { item ->
-            Text(item)
+            Text(item.name)
         }
     }
 }

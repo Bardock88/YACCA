@@ -1,4 +1,4 @@
-package com.evandhardspace.yacca.data.response
+package com.evandhardspace.yacca.response
 
 import kotlinx.serialization.Serializable
 

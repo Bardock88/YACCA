@@ -39,7 +39,7 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
@@ -47,9 +47,14 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(projects.shared)
 
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.serialization)
+            implementation(libs.serialization)
             implementation(libs.kotlinx.coroutines.core)
+
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.json)
+            implementation(libs.ktor.client.serialization)
+            implementation(libs.ktor.client.serializationJson)
+            implementation(libs.ktor.client.contentNegotiation)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)

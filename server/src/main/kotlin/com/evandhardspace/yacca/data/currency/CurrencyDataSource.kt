@@ -1,6 +1,6 @@
 package com.evandhardspace.yacca.data.currency
 
-import com.evandhardspace.yacca.data.response.CurrencyResponse
+import com.evandhardspace.yacca.response.CurrencyResponse
 import com.evandhardspace.yacca.db.FavoriteCurrencies
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
