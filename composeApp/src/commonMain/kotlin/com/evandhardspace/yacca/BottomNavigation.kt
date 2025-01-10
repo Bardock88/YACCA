@@ -24,8 +24,8 @@ sealed class Screen(val route: Route, val title: String, val icon: ImageVector) 
 
 @Composable
 fun BottomNavigationBar(
-    modifier: Modifier = Modifier,
     navController: NavHostController,
+    modifier: Modifier = Modifier,
 ) {
     val items = listOf(Screen.Home, Screen.Favourites)
     NavigationBar(modifier = modifier) {

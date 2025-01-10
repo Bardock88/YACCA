@@ -1,6 +1,9 @@
 package com.evandhardspace.yacca
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -15,12 +18,12 @@ fun App() = KoinApplication(application = { modules(appModule) }) {
     MaterialTheme {
         val navController = rememberNavController()
         Scaffold(
-            bottomBar = { BottomNavigationBar(
-                navController = navController,
-            ) }
+            bottomBar = { BottomNavigationBar(navController) }
         ) { innerPaddings ->
             NavigationHost(
-                modifier = Modifier.padding(innerPaddings),
+                modifier = Modifier
+                    .consumeWindowInsets(WindowInsets.systemBars)
+                    .padding(innerPaddings),
                 navController = navController,
             )
         }
