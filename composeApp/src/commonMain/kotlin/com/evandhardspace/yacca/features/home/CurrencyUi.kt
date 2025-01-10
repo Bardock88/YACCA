@@ -1,6 +1,6 @@
-package com.evandhardspace.yacca.domain
+package com.evandhardspace.yacca.features.home
 
-data class Currency(
+internal data class CurrencyUi(
     val id: String,
     val name: String,
     val symbol: String,
