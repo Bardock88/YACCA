@@ -1,4 +1,4 @@
-package com.evandhardspace.yacca.features.home
+package com.evandhardspace.yacca.presentation.home
 
 internal data class CurrencyUi(
     val id: String,

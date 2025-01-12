@@ -9,12 +9,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.evandhardspace.yacca.di.appModule
-import com.evandhardspace.yacca.navigation.NavigationHost
-import org.koin.compose.KoinApplication
+import com.evandhardspace.yacca.utils.di.YaccaApplication
+import com.evandhardspace.yacca.utils.navigation.NavigationHost
 
 @Composable
-fun App() = KoinApplication(application = { modules(appModule) }) {
+fun App() = YaccaApplication {
     MaterialTheme {
         val navController = rememberNavController()
         Scaffold(

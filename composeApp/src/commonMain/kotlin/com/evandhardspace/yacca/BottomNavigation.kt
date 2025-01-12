@@ -9,32 +9,43 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.evandhardspace.yacca.navigation.Route
+import com.evandhardspace.yacca.presentation.navigation.NavigationViewModel
+import com.evandhardspace.yacca.utils.navigation.Route
+import org.koin.compose.viewmodel.koinViewModel
 
 sealed class Screen(val route: Route, val title: String, val icon: ImageVector) {
     data object Home : Screen(Route.Home, "Home", Icons.Default.Home)
     data object Favourites : Screen(Route.Favourites, "Favourites", Icons.Default.Favorite)
+
+    companion object {
+        fun screens() = listOf(Home, Favourites)
+    }
 }
 
 @Composable
-fun BottomNavigationBar(
+internal fun BottomNavigationBar(
     navController: NavHostController,
+    navigationViewModel: NavigationViewModel = koinViewModel(),
     modifier: Modifier = Modifier,
 ) {
-    val items = listOf(Screen.Home, Screen.Favourites)
+    val state by navigationViewModel.navigationState.collectAsStateWithLifecycle()
+
     NavigationBar(modifier = modifier) {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination
-        items.forEach { screen ->
+        Screen.screens().forEach { screen ->
             NavigationBarItem(
                 modifier = Modifier.navigationBarsPadding(),
                 icon = { Icon(screen.icon, contentDescription = null) },
                 label = { Text(screen.title) },
+                enabled = if(screen is Screen.Favourites) state.isFavouriteEnabled else true,
                 selected = currentRoute?.hasRoute(screen.route::class) ?: false,
                 onClick = {
                     navController.navigate(screen.route) {
