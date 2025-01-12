@@ -1,9 +1,14 @@
 package com.evandhardspace.yacca.utils.di
 
+import com.evandhardspace.yacca.data.datasources.AuthDataSource
 import com.evandhardspace.yacca.data.datasources.CurrencyDataSource
+import com.evandhardspace.yacca.data.datasources.LocalEncryptedTokenDataSource
 import com.evandhardspace.yacca.data.datasources.LocalUserDataSource
+import com.evandhardspace.yacca.data.datasources.NetworkAuthDataSource
 import com.evandhardspace.yacca.data.datasources.NetworkCurrencyDataSource
+import com.evandhardspace.yacca.data.datasources.TokenDataSource
 import com.evandhardspace.yacca.data.datasources.UserDataSource
+import com.evandhardspace.yacca.domain.CleanUpManager
 import com.evandhardspace.yacca.domain.repositories.AuthRepository
 import com.evandhardspace.yacca.domain.repositories.CurrencyRepository
 import com.evandhardspace.yacca.domain.repositories.UserRepository
@@ -43,12 +48,15 @@ val viewModelModule = module {
 val dataSourceModule = module {
     factoryOf(::NetworkCurrencyDataSource) bind CurrencyDataSource::class
     factoryOf(::LocalUserDataSource) bind UserDataSource::class
+    factoryOf(::NetworkAuthDataSource) bind AuthDataSource::class
+    factoryOf(::LocalEncryptedTokenDataSource) bind TokenDataSource::class
 }
 
 val repositoryModule = module {
     factoryOf(::CurrencyRepository)
     factoryOf(::UserRepository)
     factoryOf(::AuthRepository)
+    factoryOf(::CleanUpManager)
 }
 
 expect val platformModule: Module

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-
 internal class LoginViewModel(
     private val userRepository: UserRepository,
     private val authRepository: AuthRepository,
@@ -98,6 +97,11 @@ internal class LoginViewModel(
     private suspend fun login() {
         userRepository.setUserLogged(true)
         LoginEffect.LoggedIn.send()
+        clear()
+    }
+
+    private fun clear() {
+        _viewState.update { LoginState() }
     }
 }
 

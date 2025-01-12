@@ -1,23 +1,23 @@
 package com.evandhardspace.yacca.presentation.favourites
 
 import androidx.lifecycle.viewModelScope
-import com.evandhardspace.yacca.domain.repositories.UserRepository
+import com.evandhardspace.yacca.domain.CleanUpManager
 import com.evandhardspace.yacca.utils.Effect
 import com.evandhardspace.yacca.utils.EffectViewModel
 import kotlinx.coroutines.launch
 
 internal class FavouriteCurrenciesViewModel(
-    private val userRepository: UserRepository,
+    private val cleanUpManager: CleanUpManager,
 ) : EffectViewModel<FavouriteCurrenciesEffect>() {
 
     fun logout() {
         viewModelScope.launch {
-            userRepository.setUserLogged(false)
+            cleanUpManager.clear()
             FavouriteCurrenciesEffect.LoggedOut.send()
         }
     }
 }
 
-internal sealed interface FavouriteCurrenciesEffect: Effect {
-    data object LoggedOut: FavouriteCurrenciesEffect
+internal sealed interface FavouriteCurrenciesEffect : Effect {
+    data object LoggedOut : FavouriteCurrenciesEffect
 }

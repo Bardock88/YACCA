@@ -1,14 +1,22 @@
 package com.evandhardspace.yacca.domain.repositories
 
-import kotlinx.coroutines.delay
+import com.evandhardspace.yacca.data.datasources.AuthDataSource
+import com.evandhardspace.yacca.data.datasources.TokenDataSource
 
-internal class AuthRepository {
-    suspend fun signIn(email: String, password: String): Result<Unit> = runCatching {
-        delay(1000)
+internal class AuthRepository(
+    private val authDataSource: AuthDataSource,
+    private val tokenDataSource: TokenDataSource,
+): Cleanable {
+    suspend fun signUp(email: String, password: String): Result<Unit> = runCatching {
+        authDataSource.signUp(email, password)
     }
 
+    suspend fun signIn(email: String, password: String): Result<Unit> = runCatching {
+       val accessTokenResult =  authDataSource.signIn(email, password)
+        tokenDataSource.saveAccessToken(accessTokenResult.token)
+    }
 
-    suspend fun signUp(email: String, password: String): Result<Unit> = runCatching {
-        delay(1000)
+    override suspend fun clear() {
+        tokenDataSource.clearTokens()
     }
 }
