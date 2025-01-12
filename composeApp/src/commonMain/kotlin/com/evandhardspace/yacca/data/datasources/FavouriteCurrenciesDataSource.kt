@@ -18,9 +18,9 @@ internal class NetworkFavouriteCurrenciesDataSource(
 ) : FavouriteCurrenciesDataSource {
     override suspend fun getFavouriteCurrencies(): List<CurrencyResponse> {
         return client.get("$BASE_URL/favourites") {
-            tokenDataSource.getAccessToken()?.let { token ->
-                bearerAuth(token) // todo extract to client setup logic
-            }
+//            tokenDataSource.getAccessToken()?.let { token ->
+//                bearerAuth(token) // todo extract to client setup logic
+//            }
         }.body<List<CurrencyResponse>>()
     }
 }

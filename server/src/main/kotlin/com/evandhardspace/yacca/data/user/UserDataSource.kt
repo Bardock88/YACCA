@@ -62,9 +62,9 @@ class DefaultUserDataSource : UserDataSource {
                 it[email] = user.email
                 it[hashedPassword] = user.hashedPassword
                 it[salt] = user.salt
-            }.resultedValues?.firstOrNull() // Returns the inserted row
+            }
+            true
         }
-        true
     } catch (e: ExposedSQLException) {
         println("Error adding user: ${e.localizedMessage}")
         false

@@ -28,5 +28,9 @@ internal fun FavouritesRoute(
         Button({ viewModel.logout() }) {
             Text("Log out")
         }
+        Button({viewModel.test()}) {
+            Text("Test")
+        }
+        Text("Currencies: ${viewModel.currenciesState}")
     }
 }

@@ -56,6 +56,8 @@ kotlin {
             implementation(libs.ktor.client.serializationJson)
             implementation(libs.ktor.client.contentNegotiation)
             implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.client.auth)
+            implementation(libs.kmpLogging)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
