@@ -23,6 +23,7 @@ flyway = "9.22.0"
 coroutines = "1.10.1"
 koin = "4.0.0"
 serialization = "1.8.0"
+dataStore = "1.1.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -37,6 +38,7 @@ androidx-constraintlayout = { group = "androidx.constraintlayout", name = "const
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
+dataStore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "dataStore" }
 
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }

@@ -1,4 +1,4 @@
-package com.evandhardspace.yacca.domain
+package com.evandhardspace.yacca.domain.models
 
 data class Currency(
     val id: String,

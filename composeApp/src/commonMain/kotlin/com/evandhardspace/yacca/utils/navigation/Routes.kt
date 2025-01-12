@@ -1,4 +1,4 @@
-package com.evandhardspace.yacca.navigation
+package com.evandhardspace.yacca.utils.navigation
 
 import kotlinx.serialization.Serializable
 

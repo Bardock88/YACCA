@@ -1,4 +1,4 @@
-package com.evandhardspace.yacca.features.home
+package com.evandhardspace.yacca.presentation.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,16 +44,17 @@ internal fun HomeScreen(
             }
         }
     ) { paddingValues ->
-        when (val state = uiState) {
-            is HomeScreenState.CurrencyLoaded -> HomeContent(
-                state = state,
+        when (val currencyState = uiState.currencyState) {
+            is CurrencyState.CurrencyLoaded -> HomeContent(
+                currencyState = currencyState,
+                isUserLogged = uiState.isUserLogged,
                 onLikeClick = { currency ->
                     // TODO
                 },
                 modifier = Modifier.padding(paddingValues)
             )
 
-            HomeScreenState.Error -> Box(
+            CurrencyState.Error -> Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
@@ -62,7 +63,7 @@ internal fun HomeScreen(
                 Text("Something went wrong.", color = MaterialTheme.colorScheme.error)
             }
 
-            HomeScreenState.Loading -> Box(
+            CurrencyState.Loading -> Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
@@ -76,7 +77,8 @@ internal fun HomeScreen(
 
 @Composable
 private fun HomeContent(
-    state: HomeScreenState.CurrencyLoaded,
+    currencyState: CurrencyState.CurrencyLoaded,
+    isUserLogged: Boolean,
     onLikeClick: (CurrencyUi) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -85,11 +87,11 @@ private fun HomeContent(
             .padding(horizontal = 16.dp)
             .fillMaxSize(),
     ) {
-        items(state.currencies, key = { it.id }) { currency ->
+        items(currencyState.currencies, key = { it.id }) { currency ->
             CurrencyCard(
                 currency = currency,
                 onLikeClick = onLikeClick,
-                isUserLogged = state.isUserLogged,
+                isUserLogged = isUserLogged,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),

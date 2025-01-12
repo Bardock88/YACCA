@@ -61,10 +61,13 @@ kotlin {
             implementation(libs.koin.composeViewModel)
             implementation(libs.koin.composeViewModelNavigation)
 
+            implementation(libs.dataStore.preferences)
+
             implementation(libs.kotlinx.coroutines.core)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.koin.core)
         }
     }
 }

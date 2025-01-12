@@ -1,7 +1,7 @@
-package com.evandhardspace.yacca.repositories
+package com.evandhardspace.yacca.domain.repositories
 
 import com.evandhardspace.yacca.data.datasources.CurrencyDataSource
-import com.evandhardspace.yacca.domain.Currency
+import com.evandhardspace.yacca.domain.models.Currency
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
