@@ -4,6 +4,7 @@ import com.evandhardspace.yacca.data.datasources.CurrencyDataSource
 import com.evandhardspace.yacca.data.datasources.LocalUserDataSource
 import com.evandhardspace.yacca.data.datasources.NetworkCurrencyDataSource
 import com.evandhardspace.yacca.data.datasources.UserDataSource
+import com.evandhardspace.yacca.domain.repositories.AuthRepository
 import com.evandhardspace.yacca.domain.repositories.CurrencyRepository
 import com.evandhardspace.yacca.domain.repositories.UserRepository
 import com.evandhardspace.yacca.presentation.favourites.FavouriteCurrenciesViewModel
@@ -47,6 +48,7 @@ val dataSourceModule = module {
 val repositoryModule = module {
     factoryOf(::CurrencyRepository)
     factoryOf(::UserRepository)
+    factoryOf(::AuthRepository)
 }
 
 expect val platformModule: Module

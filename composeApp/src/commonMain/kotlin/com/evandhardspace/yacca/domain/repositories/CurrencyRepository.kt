@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
-class CurrencyRepository(
+internal class CurrencyRepository(
     private val dataSource: CurrencyDataSource,
 ) {
 
