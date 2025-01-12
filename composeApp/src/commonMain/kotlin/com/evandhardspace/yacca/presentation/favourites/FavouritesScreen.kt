@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 
 
 @Composable
-fun FavouritesScreen() {
+fun FavouritesRoute() {
     Text(
         modifier = Modifier.statusBarsPadding(),
         text = "Favourite Screen",

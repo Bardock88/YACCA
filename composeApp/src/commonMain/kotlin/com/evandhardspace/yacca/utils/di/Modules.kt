@@ -7,6 +7,7 @@ import com.evandhardspace.yacca.data.datasources.UserDataSource
 import com.evandhardspace.yacca.domain.repositories.CurrencyRepository
 import com.evandhardspace.yacca.domain.repositories.UserRepository
 import com.evandhardspace.yacca.presentation.home.HomeViewModel
+import com.evandhardspace.yacca.presentation.login.LoginViewModel
 import com.evandhardspace.yacca.presentation.navigation.NavigationViewModel
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -33,6 +34,7 @@ val networkModule = module {
 val viewModelModule = module {
     viewModelOf(::HomeViewModel)
     viewModelOf(::NavigationViewModel)
+    viewModelOf(::LoginViewModel)
 }
 
 val dataSourceModule = module {
