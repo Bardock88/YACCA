@@ -41,7 +41,7 @@ fun Route.signUp(
 
         val userWasInserted = userDataSource.insertUser(user)
         if (!userWasInserted) {
-            call.respond(HttpStatusCode.Conflict)
+            call.respond(HttpStatusCode.Conflict, "User was not added to db")
             return@post
         }
 

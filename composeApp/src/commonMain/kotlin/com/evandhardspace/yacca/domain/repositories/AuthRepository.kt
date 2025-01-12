@@ -9,6 +9,7 @@ internal class AuthRepository(
 ): Cleanable {
     suspend fun signUp(email: String, password: String): Result<Unit> = runCatching {
         authDataSource.signUp(email, password)
+        authDataSource.signIn(email, password)
     }
 
     suspend fun signIn(email: String, password: String): Result<Unit> = runCatching {
