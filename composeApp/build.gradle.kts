@@ -27,7 +27,6 @@ kotlin {
     }
     
     sourceSets {
-        
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -35,6 +34,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
 
             implementation(libs.koin.android)
+            implementation(libs.encryptedSharedPreferences)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -64,6 +64,8 @@ kotlin {
             implementation(libs.dataStore.preferences)
 
             implementation(libs.kotlinx.coroutines.core)
+
+            implementation(libs.kmpSettigns)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
