@@ -6,6 +6,7 @@ import com.evandhardspace.yacca.data.datasources.NetworkCurrencyDataSource
 import com.evandhardspace.yacca.data.datasources.UserDataSource
 import com.evandhardspace.yacca.domain.repositories.CurrencyRepository
 import com.evandhardspace.yacca.domain.repositories.UserRepository
+import com.evandhardspace.yacca.presentation.favourites.FavouriteCurrenciesViewModel
 import com.evandhardspace.yacca.presentation.home.HomeViewModel
 import com.evandhardspace.yacca.presentation.login.LoginViewModel
 import com.evandhardspace.yacca.presentation.navigation.NavigationViewModel
@@ -35,6 +36,7 @@ val viewModelModule = module {
     viewModelOf(::HomeViewModel)
     viewModelOf(::NavigationViewModel)
     viewModelOf(::LoginViewModel)
+    viewModelOf(::FavouriteCurrenciesViewModel)
 }
 
 val dataSourceModule = module {
