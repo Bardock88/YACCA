@@ -6,8 +6,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.evandhardspace.yacca.Screen
-import com.evandhardspace.yacca.presentation.favourites.FavouritesScreen
-import com.evandhardspace.yacca.presentation.home.HomeScreen
+import com.evandhardspace.yacca.presentation.favourites.FavouritesRoute
+import com.evandhardspace.yacca.presentation.home.HomeRoute
 
 @Composable
 fun NavigationHost(
@@ -18,6 +18,6 @@ fun NavigationHost(
     navController = navController,
     startDestination = Screen.Home.route,
 ) {
-    composable<Route.Home> { HomeScreen() }
-    composable<Route.Favourites> { FavouritesScreen() }
+    composable<Route.Home> { HomeRoute() }
+    composable<Route.Favourites> { FavouritesRoute() }
 }
