@@ -51,8 +51,12 @@ import com.evandhardspace.yacca.utils.pxAsDp
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-internal fun HomeRoute() {
-    HomeScreen { onDismiss ->
+internal fun HomeRoute(
+    noDisabledLikeClick: (message: String) -> Unit,
+) {
+    HomeScreen(
+        onDisabledLikeClick = { noDisabledLikeClick("Login to add favourite currencies") }
+    ) { onDismiss ->
         LoginScreen(
             modifier = Modifier
                 .height(200.dp)  // todo
@@ -66,6 +70,7 @@ internal fun HomeRoute() {
 @Composable
 internal fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
+    onDisabledLikeClick: () -> Unit,
     authBottomSheetContent: @Composable (onDismiss: () -> Unit) -> Unit,
 ) {
     val uiState by viewModel.viewState.collectAsStateWithLifecycle()
@@ -100,6 +105,7 @@ internal fun HomeScreen(
                     currencyState = currencyState,
                     isUserLogged = uiState.isUserLogged,
                     onLikeClick = { currency -> /* TODO */ },
+                    onDisabledLikeClick = onDisabledLikeClick,
                     topContent = (@Composable { Spacer(Modifier.height(authSectionHeight.pxAsDp + 8.dp)) })
                         .takeUnless { uiState.isUserLogged },
                     modifier = Modifier
@@ -149,6 +155,7 @@ private fun CurrencyContent(
     currencyState: CurrencyState.CurrencyLoaded,
     isUserLogged: Boolean,
     onLikeClick: (CurrencyUi) -> Unit,
+    onDisabledLikeClick: () -> Unit,
     topContent: @Composable (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
@@ -162,8 +169,9 @@ private fun CurrencyContent(
         items(currencyState.currencies, key = { it.id }) { currency ->
             CurrencyCard(
                 currency = currency,
-                onLikeClick = onLikeClick,
                 isUserLogged = isUserLogged,
+                onLikeClick = onLikeClick,
+                onDisabledLikeClick = onDisabledLikeClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -217,6 +225,7 @@ private fun AuthSection(
 private fun CurrencyCard(
     currency: CurrencyUi,
     onLikeClick: (CurrencyUi) -> Unit,
+    onDisabledLikeClick: () -> Unit,
     modifier: Modifier = Modifier,
     isUserLogged: Boolean,
 ) {
@@ -257,7 +266,7 @@ private fun CurrencyCard(
                     tint = if (currency.isFavourite) Color.Red else MaterialTheme.colorScheme.onSurface
                 )
             }
-            else IconButton(onClick = { /* TODO */ }) {
+            else IconButton(onClick = onDisabledLikeClick) {
                 Icon(
                     imageVector = Icons.Default.FavoriteBorder,
                     contentDescription = "Favourite Disabled",
