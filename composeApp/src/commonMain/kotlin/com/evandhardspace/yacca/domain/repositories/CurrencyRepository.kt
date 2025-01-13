@@ -7,18 +7,32 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
 internal class CurrencyRepository(
-    private val dataSource: CurrencyDataSource,
+    private val currencyDataSource: CurrencyDataSource,
 ): Cleanable {
 
     suspend fun allCurrencies(): Result<List<Currency>> = withContext(Dispatchers.IO) {
         runCatching {
-            dataSource.allCurrencies().map {
+            currencyDataSource.allCurrencies().map {
                 Currency(
                     id = it.id,
                     name = it.name,
                     symbol = it.symbol,
                     priceUsd = it.priceUsd,
                     isFavourite = false,
+                )
+            }
+        }
+    }
+
+    suspend fun getFavouriteCurrencies(): Result<List<Currency>> = withContext(Dispatchers.IO) {
+        runCatching {
+            currencyDataSource.getFavouriteCurrencies().map {
+                Currency(
+                    id = it.id,
+                    name = it.name,
+                    symbol = it.symbol,
+                    priceUsd = it.priceUsd,
+                    isFavourite = true,
                 )
             }
         }
