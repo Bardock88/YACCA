@@ -17,8 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -27,7 +25,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -41,12 +38,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.evandhardspace.yacca.presentation.login.LoginScreen
+import com.evandhardspace.yacca.ui.CurrencyCard
 import com.evandhardspace.yacca.utils.pxAsDp
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -66,7 +63,7 @@ internal fun HomeRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun HomeScreen(
+private fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
     onDisabledLikeClick: () -> Unit,
     authBottomSheetContent: @Composable (onDismiss: () -> Unit) -> Unit,
@@ -167,7 +164,7 @@ private fun CurrencyContent(
         items(currencyState.currencies, key = { it.id }) { currency ->
             CurrencyCard(
                 currency = currency,
-                isUserLogged = isUserLogged,
+                isLikeEnabled = isUserLogged,
                 onLikeClick = onLikeClick,
                 onDisabledLikeClick = onDisabledLikeClick,
                 modifier = Modifier
@@ -212,63 +209,6 @@ private fun AuthSection(
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1, // Prevent infinite line wrapping
                     overflow = TextOverflow.Ellipsis // Handle any overflow
-                )
-            }
-        }
-    }
-}
-
-
-@Composable
-private fun CurrencyCard(
-    currency: CurrencyUi,
-    onLikeClick: (CurrencyUi) -> Unit,
-    onDisabledLikeClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    isUserLogged: Boolean,
-) {
-    Card(
-        modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = currency.name,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-                Text(
-                    text = "Symbol: ${currency.symbol}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Price: ${currency.price}",
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-
-            if (isUserLogged) IconButton(onClick = { onLikeClick(currency) }) {
-                Icon(
-                    imageVector = if (currency.isFavourite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Toggle Favourite",
-                    tint = if (currency.isFavourite) Color.Red else MaterialTheme.colorScheme.onSurface
-                )
-            }
-            else IconButton(onClick = onDisabledLikeClick) {
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = "Favourite Disabled",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
             }
         }
