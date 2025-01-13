@@ -55,9 +55,13 @@ class DefaultUserDataSource : UserDataSource {
         null
     }
 
-
     override suspend fun insertUser(user: User): Boolean = try {
         transaction {
+            val existingUser = Users.select { Users.email eq user.email }.singleOrNull()
+            if (existingUser != null) {
+                return@transaction false
+            }
+
             Users.insert {
                 it[email] = user.email
                 it[hashedPassword] = user.hashedPassword
