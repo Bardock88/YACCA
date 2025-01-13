@@ -63,6 +63,7 @@ class DefaultUserDataSource : UserDataSource {
             }
 
             Users.insert {
+                it[id] = user.id
                 it[email] = user.email
                 it[hashedPassword] = user.hashedPassword
                 it[salt] = user.salt
