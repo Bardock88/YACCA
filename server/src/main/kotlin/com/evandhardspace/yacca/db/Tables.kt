@@ -3,10 +3,9 @@ package com.evandhardspace.yacca.db
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime
-import java.util.*
 
 object Users : Table("users") {
-    val id = uuid("id").default(UUID.randomUUID())
+    val id = uuid("id")
     val email = varchar("username", 255).uniqueIndex()
     val hashedPassword = varchar("hashed_password", 255)  // Store the hashed password
     val salt = text("salt")
