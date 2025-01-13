@@ -32,36 +32,21 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
-import org.lighthousegames.logging.logging
 
 val networkModule = module {
     single {
-        val tokenDataSource = get<TokenDataSource>()
         HttpClient {
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true
                 })
             }
-            install(Logging){
+            install(Logging) {
                 level = LogLevel.ALL
-            }
-
-            install(Auth) {
-                bearer {
-                   loadTokens {
-                       logging.d { "bearer callback" } // todo remove
-                       tokenDataSource.getAccessToken()?.let { accessToken ->
-                           BearerTokens(accessToken, null)
-                       }
-                   }
-                }
             }
         }
     }
 }
-
-val logging = logging("test") // todo remove
 
 val viewModelModule = module {
     viewModelOf(::HomeViewModel)
