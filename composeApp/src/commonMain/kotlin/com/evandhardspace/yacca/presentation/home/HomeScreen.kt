@@ -58,9 +58,7 @@ internal fun HomeRoute(
         onDisabledLikeClick = { noDisabledLikeClick("Login to add favourite currencies") }
     ) { onDismiss ->
         LoginScreen(
-            modifier = Modifier
-                .height(200.dp)  // todo
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             onDismiss = onDismiss,
         )
     }
@@ -254,7 +252,7 @@ private fun CurrencyCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Price: $${currency.priceUsd}",
+                    text = "Price: ${currency.price}",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }

@@ -4,6 +4,6 @@ internal data class CurrencyUi(
     val id: String,
     val name: String,
     val symbol: String,
-    val priceUsd: Double,
+    val price: String,
     val isFavourite: Boolean,
 )

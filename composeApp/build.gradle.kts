@@ -27,7 +27,6 @@ kotlin {
     }
     
     sourceSets {
-        
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -35,6 +34,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
 
             implementation(libs.koin.android)
+            implementation(libs.encryptedSharedPreferences)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -55,6 +55,9 @@ kotlin {
             implementation(libs.ktor.client.serialization)
             implementation(libs.ktor.client.serializationJson)
             implementation(libs.ktor.client.contentNegotiation)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.client.auth)
+            implementation(libs.kmpLogging)
 
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
@@ -64,6 +67,8 @@ kotlin {
             implementation(libs.dataStore.preferences)
 
             implementation(libs.kotlinx.coroutines.core)
+
+            implementation(libs.kmpSettigns)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

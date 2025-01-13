@@ -6,9 +6,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 
-class CurrencyRepository(
+internal class CurrencyRepository(
     private val dataSource: CurrencyDataSource,
-) {
+): Cleanable {
 
     suspend fun allCurrencies(): Result<List<Currency>> = withContext(Dispatchers.IO) {
         runCatching {
@@ -22,5 +22,9 @@ class CurrencyRepository(
                 )
             }
         }
+    }
+
+    override suspend fun clear() {
+        /* no-op yet */
     }
 }

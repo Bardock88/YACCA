@@ -1,7 +1,7 @@
 package com.evandhardspace.yacca.routes
 
-import com.evandhardspace.yacca.data.request.AuthRequest
-import com.evandhardspace.yacca.data.response.AuthResponse
+import com.evandhardspace.yacca.request.AuthRequest
+import com.evandhardspace.yacca.response.AuthResponse
 import com.evandhardspace.yacca.data.user.User
 import com.evandhardspace.yacca.data.user.UserDataSource
 import com.evandhardspace.yacca.security.hashing.HashingService
@@ -41,7 +41,7 @@ fun Route.signUp(
 
         val userWasInserted = userDataSource.insertUser(user)
         if (!userWasInserted) {
-            call.respond(HttpStatusCode.Conflict)
+            call.respond(HttpStatusCode.Conflict, "User was not added to db")
             return@post
         }
 

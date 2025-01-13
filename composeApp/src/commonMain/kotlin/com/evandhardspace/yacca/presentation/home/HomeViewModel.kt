@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.evandhardspace.yacca.domain.repositories.CurrencyRepository
 import com.evandhardspace.yacca.domain.repositories.UserRepository
+import com.evandhardspace.yacca.utils.formatToNDecimalPlaces
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -34,12 +35,6 @@ internal class HomeViewModel(
             }.launchIn(viewModelScope)
     }
 
-    fun test() {
-        viewModelScope.launch {
-            userRepository.setUserLogged(true)
-        }
-    }
-
     fun refresh() {
         viewModelScope.launch {
             _viewState.update {
@@ -58,7 +53,7 @@ internal class HomeViewModel(
                             id = it.id,
                             name = it.name,
                             symbol = it.symbol,
-                            priceUsd = it.priceUsd,
+                            price = "$${it.priceUsd.formatToNDecimalPlaces(3) }",
                             isFavourite = it.isFavourite,
                         )
                     }
