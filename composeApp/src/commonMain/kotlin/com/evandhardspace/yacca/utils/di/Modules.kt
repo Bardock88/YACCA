@@ -1,5 +1,8 @@
 package com.evandhardspace.yacca.utils.di
 
+import com.evandhardspace.yacca.data.database.AppDatabase
+import com.evandhardspace.yacca.data.database.CurrencyDao
+import com.evandhardspace.yacca.data.database.provideDatabase
 import com.evandhardspace.yacca.data.datasources.AuthDataSource
 import com.evandhardspace.yacca.data.datasources.CurrencyDataSource
 import com.evandhardspace.yacca.data.datasources.LocalEncryptedTokenDataSource
@@ -34,7 +37,7 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-val networkModule = module {
+private val networkModule = module {
     single {
         val tokenDataSource = get<TokenDataSource>()
         HttpClient {
@@ -73,34 +76,40 @@ val networkModule = module {
     }
 }
 
-val viewModelModule = module {
+private val viewModelModule = module {
     viewModelOf(::HomeViewModel)
     viewModelOf(::NavigationViewModel)
     viewModelOf(::LoginViewModel)
     viewModelOf(::FavouriteCurrenciesViewModel)
 }
 
-val dataSourceModule = module {
+private val dataSourceModule = module {
     factoryOf(::NetworkCurrencyDataSource) bind CurrencyDataSource::class
     factoryOf(::NetworkAuthDataSource) bind AuthDataSource::class
     factoryOf(::LocalUserDataSource) bind UserDataSource::class
     factoryOf(::LocalEncryptedTokenDataSource) bind TokenDataSource::class
 }
 
-val repositoryModule = module {
+private val repositoryModule = module {
     factoryOf(::CurrencyRepository)
     factoryOf(::UserRepository)
     factoryOf(::AuthRepository)
     factoryOf(::CleanUpManager)
 }
 
+private val persistenceModule = module {
+    single<AppDatabase> { provideDatabase(get()) }
+    single<CurrencyDao> { get<AppDatabase>().currencyDao() }
+}
+
 expect val platformModule: Module
 
-val appModule
+internal val appModule
     get() = listOf(
         networkModule,
         viewModelModule,
         dataSourceModule,
         repositoryModule,
         platformModule,
+        persistenceModule,
     )
