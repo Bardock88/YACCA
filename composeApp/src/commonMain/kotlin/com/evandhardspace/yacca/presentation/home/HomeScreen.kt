@@ -52,7 +52,7 @@ internal fun HomeRoute(
     noDisabledLikeClick: (message: String) -> Unit,
 ) {
     HomeScreen(
-        onDisabledLikeClick = { noDisabledLikeClick("Login to add favourite currencies") }
+        onDisabledLikeClick = { noDisabledLikeClick("Login to add favourite currencies") },
     ) { onDismiss ->
         LoginScreen(
             modifier = Modifier.fillMaxWidth(),
@@ -99,7 +99,7 @@ private fun HomeScreen(
                 is CurrencyState.CurrencyLoaded -> CurrencyContent(
                     currencyState = currencyState,
                     isUserLogged = uiState.isUserLogged,
-                    onLikeClick = { currency -> /* TODO */ },
+                    onLikeClick = viewModel::addToFavourite, // todo rearrange composable
                     onDisabledLikeClick = onDisabledLikeClick,
                     topContent = (@Composable { Spacer(Modifier.height(authSectionHeight.pxAsDp + 8.dp)) })
                         .takeUnless { uiState.isUserLogged },
@@ -149,7 +149,7 @@ private fun HomeScreen(
 private fun CurrencyContent(
     currencyState: CurrencyState.CurrencyLoaded,
     isUserLogged: Boolean,
-    onLikeClick: (CurrencyUi) -> Unit,
+    onLikeClick: (currencyId: String) -> Unit,
     onDisabledLikeClick: () -> Unit,
     topContent: @Composable (() -> Unit)?,
     modifier: Modifier = Modifier,
@@ -165,7 +165,7 @@ private fun CurrencyContent(
             CurrencyCard(
                 currency = currency,
                 isLikeEnabled = isUserLogged,
-                onLikeClick = onLikeClick,
+                onLikeClick = { onLikeClick(it.id) } ,
                 onDisabledLikeClick = onDisabledLikeClick,
                 modifier = Modifier
                     .fillMaxWidth()

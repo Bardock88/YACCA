@@ -26,7 +26,6 @@ internal class NetworkAuthDataSource(
                     password = password,
                 )
             )
-            contentType(ContentType.Application.Json)
         }
     }
 
@@ -38,6 +37,5 @@ internal class NetworkAuthDataSource(
                     password = password,
                 )
             )
-            contentType(ContentType.Application.Json)
         }.body()
 }

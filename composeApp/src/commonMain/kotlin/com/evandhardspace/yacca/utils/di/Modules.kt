@@ -17,9 +17,15 @@ import com.evandhardspace.yacca.presentation.home.HomeViewModel
 import com.evandhardspace.yacca.presentation.login.LoginViewModel
 import com.evandhardspace.yacca.presentation.navigation.NavigationViewModel
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
@@ -30,7 +36,11 @@ import org.koin.dsl.module
 
 val networkModule = module {
     single {
+        val tokenDataSource = get<TokenDataSource>()
         HttpClient {
+            install(DefaultRequest) {
+                contentType(ContentType.Application.Json)
+            }
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true
@@ -38,6 +48,26 @@ val networkModule = module {
             }
             install(Logging) {
                 level = LogLevel.ALL
+            }
+            install(Auth) {
+                bearer {
+                    loadTokens {
+                        tokenDataSource.getAccessToken()?.let { token ->
+                            BearerTokens(
+                                accessToken = token,
+                                refreshToken = null,
+                            )
+                        }
+                    }
+                    refreshTokens {
+                        tokenDataSource.getAccessToken()?.let { token ->
+                            BearerTokens(
+                                accessToken = token,
+                                refreshToken = null,
+                            )
+                        }
+                    }
+                }
             }
         }
     }

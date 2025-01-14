@@ -44,6 +44,29 @@ internal class HomeViewModel(
         }
     }
 
+    fun addToFavourite(currencyId: String) {
+        viewModelScope.launch {
+            currencyRepository.addToFavourites(currencyId)
+                .fold(
+                    onSuccess = {
+                        // start
+                        _viewState.update { state ->
+                            val currencyState = state.currencyState
+                            if(currencyState !is CurrencyState.CurrencyLoaded) return@update state
+                            state.copy(
+                                currencyState = currencyState.copy(currencies = currencyState.currencies.map {
+                                    if(it.id == currencyId) it.copy(isFavourite = true)
+                                    else it
+                                })
+                            )
+                        } // todo remove
+                        // end
+                    },
+                    onFailure = { /* todo */}
+                )
+        }
+    }
+
     private suspend fun updateAllCurrencies() {
         _viewState.update { state ->
             currencyRepository.allCurrencies()

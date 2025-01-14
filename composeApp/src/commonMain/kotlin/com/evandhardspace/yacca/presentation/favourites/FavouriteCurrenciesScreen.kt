@@ -11,7 +11,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
@@ -68,7 +69,7 @@ private fun FavouriteCurrenciesScreenScreen(
                 }
                 Spacer(Modifier.width(8.dp))
                 FloatingActionButton(onClick = viewModel::logout) {
-                    Icon(Icons.Default.Delete, contentDescription = "Logout")
+                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout")
                 }
             }
         }

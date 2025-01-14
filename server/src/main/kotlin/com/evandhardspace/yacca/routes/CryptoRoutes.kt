@@ -1,7 +1,7 @@
 package com.evandhardspace.yacca.routes
 
 import com.evandhardspace.yacca.data.currency.CurrencyDataSource
-import com.evandhardspace.yacca.data.request.FavouriteCurrencyRequest
+import com.evandhardspace.yacca.request.FavouriteCurrencyRequest
 import com.evandhardspace.yacca.utils.userId
 import io.ktor.http.*
 import io.ktor.server.auth.*
