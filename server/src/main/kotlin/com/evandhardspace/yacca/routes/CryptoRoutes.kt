@@ -13,12 +13,25 @@ import java.util.*
 fun Route.currencies(
     currencyDataSource: CurrencyDataSource,
 ) {
-    get("currencies") {
+    get("currencies/public-info") {
         val currencies = currencyDataSource.allCurrencies()
         call.respond(HttpStatusCode.OK, currencies)
     }
 
     authenticate {
+        get("currencies/user-info") {
+            val userId = call.userId ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@get
+            }
+
+            val favouriteCurrencies = currencyDataSource.allUserCurrencies(UUID.fromString(userId)) ?: run {
+                call.respond(HttpStatusCode.Conflict) // todo check if status is correct
+                return@get
+            }
+            call.respond(HttpStatusCode.OK, favouriteCurrencies)
+        }
+
         get("favourites") {
             val userId = call.userId ?: run {
                 call.respond(HttpStatusCode.Unauthorized)

@@ -83,7 +83,7 @@ internal class NetworkCurrencyDataSource(
 ) : CurrencyDataSource {
 
     override suspend fun allCurrencies(): List<CurrencyResponse> {
-        return client.get("$BASE_URL/currencies")
+        return client.get("$BASE_URL/currencies/public-info")
             .body<List<CurrencyResponse>>()
     }
 

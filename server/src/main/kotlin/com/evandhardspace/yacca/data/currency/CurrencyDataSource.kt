@@ -2,6 +2,7 @@ package com.evandhardspace.yacca.data.currency
 
 import com.evandhardspace.yacca.response.CurrencyResponse
 import com.evandhardspace.yacca.db.FavoriteCurrencies
+import com.evandhardspace.yacca.response.UserCurrencyResponse
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
@@ -20,6 +21,8 @@ interface CurrencyDataSource {
     suspend fun deleteFavouriteCurrency(userId: UUID, currencyId: String): Boolean
 
     suspend fun getFavouriteCurrencies(userId: UUID): List<CurrencyResponse>?
+
+    suspend fun allUserCurrencies(userId: UUID): List<UserCurrencyResponse>?
 }
 
 class DefaultCurrencyDataSource(
@@ -40,6 +43,18 @@ class DefaultCurrencyDataSource(
     } catch (e: ExposedSQLException) {
         println("Error adding favorite: ${e.localizedMessage}") // todo add logging
         false
+    }
+
+    override suspend fun allUserCurrencies(userId: UUID): List<UserCurrencyResponse>? = try {
+        val favouriteCurrenciesIds = transaction {
+            FavoriteCurrencies.select { FavoriteCurrencies.userId eq userId }
+                .map { it[FavoriteCurrencies.currencyId] }
+        }.toSet()
+
+        allCurrencies().map { it.asResponse(favouriteCurrenciesIds) }
+    } catch (e: ExposedSQLException) {
+        println("Error adding favorite: ${e.localizedMessage}") // todo add logging
+        null
     }
 
     override suspend fun deleteFavouriteCurrency(userId: UUID, currencyId: String): Boolean = try {
@@ -77,4 +92,13 @@ private fun CurrencyResource.asResponse(): CurrencyResponse =
         name = name,
         symbol = symbol,
         priceUsd = priceUsd,
+    )
+
+private fun CurrencyResponse.asResponse(favouriteCurrenciesIds: Set<String>): UserCurrencyResponse =
+    UserCurrencyResponse(
+        id = id,
+        name = name,
+        symbol = symbol,
+        priceUsd = priceUsd,
+        isFavourite = id in favouriteCurrenciesIds,
     )

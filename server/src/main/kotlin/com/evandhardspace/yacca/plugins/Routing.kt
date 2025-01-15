@@ -40,19 +40,6 @@ fun Application.configureRouting(
         currencies(
             currencyDataSource = currencyDataSource,
         )
-        secret()
     }
 }
 
-// todo remove
-private fun Route.secret() {
-    authenticate {
-        get("secret") {
-            val userId = call.userId ?: run {
-                call.respond(HttpStatusCode.Unauthorized)
-                return@get
-            }
-            call.respond(HttpStatusCode.OK, userId)
-        }
-    }
-}
