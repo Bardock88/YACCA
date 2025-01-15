@@ -5,6 +5,7 @@ import com.evandhardspace.yacca.data.database.CurrencyDao
 import com.evandhardspace.yacca.data.database.provideDatabase
 import com.evandhardspace.yacca.data.datasources.AuthDataSource
 import com.evandhardspace.yacca.data.datasources.CurrencyDataSource
+import com.evandhardspace.yacca.data.datasources.LocalCurrenciesDataSource
 import com.evandhardspace.yacca.data.datasources.LocalEncryptedTokenDataSource
 import com.evandhardspace.yacca.data.datasources.LocalUserDataSource
 import com.evandhardspace.yacca.data.datasources.NetworkAuthDataSource
@@ -88,6 +89,7 @@ private val dataSourceModule = module {
     factoryOf(::NetworkAuthDataSource) bind AuthDataSource::class
     factoryOf(::LocalUserDataSource) bind UserDataSource::class
     factoryOf(::LocalEncryptedTokenDataSource) bind TokenDataSource::class
+    factoryOf(::LocalCurrenciesDataSource)
 }
 
 private val repositoryModule = module {

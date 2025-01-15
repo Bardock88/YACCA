@@ -26,7 +26,26 @@ internal class HomeViewModel(
     val viewState = _viewState.asStateFlow()
 
     init {
-        viewModelScope.launch { updateAllCurrencies() }
+        viewModelScope.launch {
+            currencyRepository.fetchCurrencies()
+        }
+        currencyRepository.allCurrencies().onEach { currencies ->
+            _viewState.update { state ->
+                state.copy(
+                    currencyState = CurrencyState.CurrencyLoaded(
+                        currencies.map {
+                            CurrencyUi(
+                                id = it.id,
+                                name = it.name,
+                                symbol = it.symbol,
+                                price = "$${it.priceUsd.formatToNDecimalPlaces(3)}",
+                                isFavourite = it.isFavourite,
+                            )
+                        }
+                    )
+                )
+            }
+        }.launchIn(viewModelScope)
 
         userRepository
             .isUserLoggedIn()
@@ -40,7 +59,7 @@ internal class HomeViewModel(
             _viewState.update {
                 it.copy(currencyState = CurrencyState.Loading)
             }
-            updateAllCurrencies()
+            currencyRepository.fetchCurrencies() // todo
         }
     }
 
@@ -52,44 +71,17 @@ internal class HomeViewModel(
                         // start
                         _viewState.update { state ->
                             val currencyState = state.currencyState
-                            if(currencyState !is CurrencyState.CurrencyLoaded) return@update state
+                            if (currencyState !is CurrencyState.CurrencyLoaded) return@update state
                             state.copy(
                                 currencyState = currencyState.copy(currencies = currencyState.currencies.map {
-                                    if(it.id == currencyId) it.copy(isFavourite = true)
+                                    if (it.id == currencyId) it.copy(isFavourite = true)
                                     else it
                                 })
                             )
                         } // todo remove
                         // end
                     },
-                    onFailure = { /* todo */}
-                )
-        }
-    }
-
-    private suspend fun updateAllCurrencies() {
-        _viewState.update { state ->
-            currencyRepository.allCurrencies()
-                .map { currencies ->
-                    currencies.map {
-                        CurrencyUi(
-                            id = it.id,
-                            name = it.name,
-                            symbol = it.symbol,
-                            price = "$${it.priceUsd.formatToNDecimalPlaces(3) }",
-                            isFavourite = it.isFavourite,
-                        )
-                    }
-                }
-                .fold(
-                    onSuccess = { currencies ->
-                        state.copy(
-                            currencyState = CurrencyState.CurrencyLoaded(currencies)
-                        )
-                    },
-                    onFailure = {
-                        state.copy(currencyState = CurrencyState.Error)
-                    }
+                    onFailure = { /* todo */ }
                 )
         }
     }
