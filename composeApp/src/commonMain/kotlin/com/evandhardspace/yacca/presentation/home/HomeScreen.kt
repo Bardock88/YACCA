@@ -53,10 +53,10 @@ internal fun HomeRoute(
 ) {
     HomeScreen(
         onDisabledLikeClick = { noDisabledLikeClick("Login to add favourite currencies") },
-    ) { onDismiss ->
+    ) { onLoggedIn ->
         LoginScreen(
             modifier = Modifier.fillMaxWidth(),
-            onDismiss = onDismiss,
+            onLoggedIn = onLoggedIn,
         )
     }
 }
@@ -66,7 +66,7 @@ internal fun HomeRoute(
 private fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
     onDisabledLikeClick: () -> Unit,
-    authBottomSheetContent: @Composable (onDismiss: () -> Unit) -> Unit,
+    authBottomSheetContent: @Composable (onLoggedIn: () -> Unit) -> Unit,
 ) {
     val uiState by viewModel.viewState.collectAsStateWithLifecycle()
 
@@ -78,7 +78,10 @@ private fun HomeScreen(
             onDismissRequest = { showAuthSheet = false },
             sheetState = bottomSheetState,
         ) {
-            authBottomSheetContent { showAuthSheet = false }
+            authBottomSheetContent {
+                viewModel.refresh()
+                showAuthSheet = false
+            }
         }
     }
     var authSectionHeight by remember { mutableIntStateOf(0) }
@@ -98,11 +101,11 @@ private fun HomeScreen(
             when (val currencyState = uiState.currencyState) {
                 is CurrencyState.CurrencyLoaded -> CurrencyContent(
                     currencyState = currencyState,
-                    isUserLogged = uiState.isUserLogged,
-                    onLikeClick = viewModel::addToFavourite, // todo rearrange composable
+                    isUserLogged = uiState.isUserLoggedIn,
+                    onLikeClick = viewModel::onLike, // todo rearrange composable
                     onDisabledLikeClick = onDisabledLikeClick,
                     topContent = (@Composable { Spacer(Modifier.height(authSectionHeight.pxAsDp + 8.dp)) })
-                        .takeUnless { uiState.isUserLogged },
+                        .takeUnless { uiState.isUserLoggedIn },
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
@@ -126,7 +129,7 @@ private fun HomeScreen(
             }
         }
         AnimatedVisibility(
-            visible = uiState.isUserLogged.not(),
+            visible = uiState.isUserLoggedIn.not(),
             enter = slideInVertically(
                 initialOffsetY = { fullHeight -> -fullHeight } // Slide in from the top
             ) + fadeIn(),
@@ -165,7 +168,7 @@ private fun CurrencyContent(
             CurrencyCard(
                 currency = currency,
                 isLikeEnabled = isUserLogged,
-                onLikeClick = { onLikeClick(it.id) } ,
+                onLikeClick = { onLikeClick(it.id) },
                 onDisabledLikeClick = onDisabledLikeClick,
                 modifier = Modifier
                     .fillMaxWidth()

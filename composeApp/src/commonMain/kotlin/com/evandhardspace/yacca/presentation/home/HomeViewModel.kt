@@ -14,21 +14,18 @@ import kotlinx.coroutines.launch
 
 internal class HomeViewModel(
     private val currencyRepository: CurrencyRepository,
-    private val userRepository: UserRepository,
+    userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(
         HomeScreenState(
             currencyState = CurrencyState.Loading,
-            isUserLogged = false,
+            isUserLoggedIn = false,
         )
     )
     val viewState = _viewState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            currencyRepository.fetchCurrencies()
-        }
         currencyRepository.allCurrencies().onEach { currencies ->
             _viewState.update { state ->
                 state.copy(
@@ -49,9 +46,14 @@ internal class HomeViewModel(
 
         userRepository
             .isUserLoggedIn()
-            .onEach { isUserLogged ->
-                _viewState.update { it.copy(isUserLogged = isUserLogged) }
+            .onEach { isUserLoggedIn ->
+                _viewState.update { it.copy(isUserLoggedIn = isUserLoggedIn) }
+                refresh()
             }.launchIn(viewModelScope)
+
+        viewModelScope.launch {
+            currencyRepository.fetchCurrencies()
+        }
     }
 
     fun refresh() {
@@ -59,30 +61,38 @@ internal class HomeViewModel(
             _viewState.update {
                 it.copy(currencyState = CurrencyState.Loading)
             }
-            currencyRepository.fetchCurrencies() // todo
+            currencyRepository.fetchCurrencies().fold(
+                onSuccess = { /* todo */ },
+                onFailure = { /* todo */ },
+            )
         }
     }
 
-    fun addToFavourite(currencyId: String) {
+    fun onLike(currencyId: String) {
         viewModelScope.launch {
-            currencyRepository.addToFavourites(currencyId)
-                .fold(
-                    onSuccess = {
-                        // start
-                        _viewState.update { state ->
-                            val currencyState = state.currencyState
-                            if (currencyState !is CurrencyState.CurrencyLoaded) return@update state
-                            state.copy(
-                                currencyState = currencyState.copy(currencies = currencyState.currencies.map {
-                                    if (it.id == currencyId) it.copy(isFavourite = true)
-                                    else it
-                                })
-                            )
-                        } // todo remove
-                        // end
-                    },
-                    onFailure = { /* todo */ }
-                )
+            val isFavourite = (_viewState.value.currencyState as? CurrencyState.CurrencyLoaded)
+                ?.currencies
+                ?.firstOrNull { it.id == currencyId }
+                ?.isFavourite ?: false
+            if (isFavourite) deleteFromFavourites(currencyId)
+            else addToFavourite(currencyId)
+
         }
+    }
+
+    private suspend fun addToFavourite(currencyId: String) {
+        currencyRepository.addToFavourites(currencyId)
+            .fold(
+                onSuccess = { /* todo */ },
+                onFailure = { /* todo */ },
+            )
+    }
+
+    private suspend fun deleteFromFavourites(currencyId: String) {
+        currencyRepository.deleteFromFavourites(currencyId)
+            .fold(
+                onSuccess = { /* todo */ },
+                onFailure = { /* todo */ },
+            )
     }
 }

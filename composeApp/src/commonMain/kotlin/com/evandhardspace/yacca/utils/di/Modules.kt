@@ -16,15 +16,14 @@ import com.evandhardspace.yacca.domain.CleanUpManager
 import com.evandhardspace.yacca.domain.repositories.AuthRepository
 import com.evandhardspace.yacca.domain.repositories.CurrencyRepository
 import com.evandhardspace.yacca.domain.repositories.UserRepository
+import com.evandhardspace.yacca.presentation.SessionRepository
 import com.evandhardspace.yacca.presentation.favourites.FavouriteCurrenciesViewModel
 import com.evandhardspace.yacca.presentation.home.HomeViewModel
 import com.evandhardspace.yacca.presentation.login.LoginViewModel
 import com.evandhardspace.yacca.presentation.navigation.NavigationViewModel
+import com.evandhardspace.yacca.utils.client.NetworkClient
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.DefaultRequest
-import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.auth.providers.BearerTokens
-import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -34,13 +33,13 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
 private val networkModule = module {
     single {
-        val tokenDataSource = get<TokenDataSource>()
         HttpClient {
             install(DefaultRequest) {
                 contentType(ContentType.Application.Json)
@@ -53,28 +52,9 @@ private val networkModule = module {
             install(Logging) {
                 level = LogLevel.ALL
             }
-            install(Auth) {
-                bearer {
-                    loadTokens {
-                        tokenDataSource.getAccessToken()?.let { token ->
-                            BearerTokens(
-                                accessToken = token,
-                                refreshToken = null,
-                            )
-                        }
-                    }
-                    refreshTokens {
-                        tokenDataSource.getAccessToken()?.let { token ->
-                            BearerTokens(
-                                accessToken = token,
-                                refreshToken = null,
-                            )
-                        }
-                    }
-                }
-            }
         }
     }
+    factoryOf(::NetworkClient)
 }
 
 private val viewModelModule = module {
@@ -97,6 +77,7 @@ private val repositoryModule = module {
     factoryOf(::UserRepository)
     factoryOf(::AuthRepository)
     factoryOf(::CleanUpManager)
+    singleOf(::SessionRepository)
 }
 
 private val persistenceModule = module {

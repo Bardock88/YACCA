@@ -2,7 +2,7 @@ package com.evandhardspace.yacca.presentation.home
 
 internal data class HomeScreenState(
     val currencyState: CurrencyState,
-    val isUserLogged: Boolean,
+    val isUserLoggedIn: Boolean,
 )
 
 internal sealed interface CurrencyState {

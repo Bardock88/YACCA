@@ -6,7 +6,7 @@ import com.evandhardspace.yacca.data.datasources.TokenDataSource
 internal class AuthRepository(
     private val authDataSource: AuthDataSource,
     private val tokenDataSource: TokenDataSource,
-): Cleanable {
+) {
     suspend fun signUp(email: String, password: String): Result<Unit> = runCatching {
         authDataSource.signUp(email, password)
         signIn(email, password)
@@ -15,9 +15,5 @@ internal class AuthRepository(
     suspend fun signIn(email: String, password: String): Result<Unit> = runCatching {
        val accessTokenResult =  authDataSource.signIn(email, password)
         tokenDataSource.saveAccessToken(accessTokenResult.token)
-    }
-
-    override suspend fun clear() {
-        tokenDataSource.clearTokens()
     }
 }

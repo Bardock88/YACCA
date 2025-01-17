@@ -1,13 +1,13 @@
 package com.evandhardspace.yacca.data.datasources
 
+import com.evandhardspace.yacca.domain.repositories.Cleanable
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.get
 import com.russhwolf.settings.set
 
-internal interface TokenDataSource {
+internal interface TokenDataSource: Cleanable {
     suspend fun saveAccessToken(accessToken: String)
     suspend fun getAccessToken(): String?
-    suspend fun clearTokens()
 }
 
 internal class LocalEncryptedTokenDataSource(
@@ -20,7 +20,7 @@ internal class LocalEncryptedTokenDataSource(
     override suspend fun getAccessToken(): String? =
         settings[ACCESS_TOKEN_KEY]
 
-    override suspend fun clearTokens() {
+    override suspend fun clear() {
         settings.clear()
     }
 }

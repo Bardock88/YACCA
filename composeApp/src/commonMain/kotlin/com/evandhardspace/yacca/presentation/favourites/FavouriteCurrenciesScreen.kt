@@ -56,11 +56,6 @@ private fun FavouriteCurrenciesScreenScreen(
         }
     }
 
-    // todo: remove once depending on local data
-    LifecycleEventEffect(event = Lifecycle.Event.ON_CREATE) {
-        viewModel.refresh()
-    }
-
     Scaffold(
         floatingActionButton = {
             Row {
@@ -82,7 +77,7 @@ private fun FavouriteCurrenciesScreenScreen(
             when (val currencyState = uiState) {
                 is CurrencyState.CurrencyLoaded -> CurrencyContent(
                     currencyState = currencyState,
-                    onLikeClick = { currency -> /* TODO */ },
+                    onLikeClick = viewModel::deleteFromFavourites,
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp),
@@ -111,7 +106,7 @@ private fun FavouriteCurrenciesScreenScreen(
 @Composable
 private fun CurrencyContent(
     currencyState: CurrencyState.CurrencyLoaded,
-    onLikeClick: (CurrencyUi) -> Unit,
+    onLikeClick: (currencyId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(modifier.fillMaxSize()) {
@@ -119,7 +114,7 @@ private fun CurrencyContent(
             CurrencyCard(
                 currency = currency,
                 isLikeEnabled = true,
-                onLikeClick = onLikeClick,
+                onLikeClick = { onLikeClick(it.id) },
                 onDisabledLikeClick = { /* no-op */ },
                 modifier = Modifier
                     .fillMaxWidth()

@@ -29,5 +29,5 @@ abstract class EffectViewModel<E : Effect> : ViewModel() {
 }
 
 @Composable
-fun <E : Effect> OnEffect(effect: Flow<E>, onEffect: (E) -> Unit): Unit =
+fun <E : Effect> OnEffect(effect: Flow<E>, onEffect: suspend (E) -> Unit): Unit =
     LaunchedEffect(Unit) { effect.collect(onEffect) }

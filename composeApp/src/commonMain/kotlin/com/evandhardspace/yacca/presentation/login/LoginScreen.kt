@@ -32,12 +32,12 @@ import org.koin.compose.viewmodel.koinViewModel
 internal fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = koinViewModel(),
-    onDismiss: () -> Unit,
+    onLoggedIn: () -> Unit,
 ) {
     val state by viewModel.viewState.collectAsStateWithLifecycle()
     OnEffect(viewModel.effect) { effect ->
         when (effect) {
-            LoginEffect.LoggedIn -> onDismiss()
+            LoginEffect.LoggedIn -> onLoggedIn()
         }
     }
 
