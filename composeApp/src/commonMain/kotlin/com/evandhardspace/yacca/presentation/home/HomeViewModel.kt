@@ -14,25 +14,46 @@ import kotlinx.coroutines.launch
 
 internal class HomeViewModel(
     private val currencyRepository: CurrencyRepository,
-    private val userRepository: UserRepository,
+    userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(
         HomeScreenState(
             currencyState = CurrencyState.Loading,
-            isUserLogged = false,
+            isUserLoggedIn = false,
         )
     )
     val viewState = _viewState.asStateFlow()
 
     init {
-        viewModelScope.launch { updateAllCurrencies() }
+        currencyRepository.allCurrencies().onEach { currencies ->
+            _viewState.update { state ->
+                state.copy(
+                    currencyState = CurrencyState.CurrencyLoaded(
+                        currencies.map {
+                            CurrencyUi(
+                                id = it.id,
+                                name = it.name,
+                                symbol = it.symbol,
+                                price = "$${it.priceUsd.formatToNDecimalPlaces(3)}",
+                                isFavourite = it.isFavourite,
+                            )
+                        }
+                    )
+                )
+            }
+        }.launchIn(viewModelScope)
 
         userRepository
             .isUserLoggedIn()
-            .onEach { isUserLogged ->
-                _viewState.update { it.copy(isUserLogged = isUserLogged) }
+            .onEach { isUserLoggedIn ->
+                _viewState.update { it.copy(isUserLoggedIn = isUserLoggedIn) }
+                refresh()
             }.launchIn(viewModelScope)
+
+        viewModelScope.launch {
+            currencyRepository.fetchCurrencies()
+        }
     }
 
     fun refresh() {
@@ -40,34 +61,38 @@ internal class HomeViewModel(
             _viewState.update {
                 it.copy(currencyState = CurrencyState.Loading)
             }
-            updateAllCurrencies()
+            currencyRepository.fetchCurrencies().fold(
+                onSuccess = { /* todo */ },
+                onFailure = { /* todo */ },
+            )
         }
     }
 
-    private suspend fun updateAllCurrencies() {
-        _viewState.update { state ->
-            currencyRepository.allCurrencies()
-                .map { currencies ->
-                    currencies.map {
-                        CurrencyUi(
-                            id = it.id,
-                            name = it.name,
-                            symbol = it.symbol,
-                            price = "$${it.priceUsd.formatToNDecimalPlaces(3) }",
-                            isFavourite = it.isFavourite,
-                        )
-                    }
-                }
-                .fold(
-                    onSuccess = { currencies ->
-                        state.copy(
-                            currencyState = CurrencyState.CurrencyLoaded(currencies)
-                        )
-                    },
-                    onFailure = {
-                        state.copy(currencyState = CurrencyState.Error)
-                    }
-                )
+    fun onLike(currencyId: String) {
+        viewModelScope.launch {
+            val isFavourite = (_viewState.value.currencyState as? CurrencyState.CurrencyLoaded)
+                ?.currencies
+                ?.firstOrNull { it.id == currencyId }
+                ?.isFavourite ?: false
+            if (isFavourite) deleteFromFavourites(currencyId)
+            else addToFavourite(currencyId)
+
         }
+    }
+
+    private suspend fun addToFavourite(currencyId: String) {
+        currencyRepository.addToFavourites(currencyId)
+            .fold(
+                onSuccess = { /* todo */ },
+                onFailure = { /* todo */ },
+            )
+    }
+
+    private suspend fun deleteFromFavourites(currencyId: String) {
+        currencyRepository.deleteFromFavourites(currencyId)
+            .fold(
+                onSuccess = { /* todo */ },
+                onFailure = { /* todo */ },
+            )
     }
 }

@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.room)
+    alias(libs.plugins.ksp)
 }
 
 kotlin {
@@ -43,6 +45,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.materialIconsExtended)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(projects.shared)
@@ -69,6 +72,13 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
 
             implementation(libs.kmpSettigns)
+            // fixes transitive dependency
+            implementation(libs.stately.common)
+
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
+
+
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -105,7 +115,12 @@ android {
     }
 }
 
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+
 dependencies {
     debugImplementation(compose.uiTooling)
+    ksp(libs.room.compiler)
 }
 
