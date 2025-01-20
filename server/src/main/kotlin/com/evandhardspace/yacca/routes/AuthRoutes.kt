@@ -4,6 +4,7 @@ import com.evandhardspace.yacca.request.AuthRequest
 import com.evandhardspace.yacca.response.AuthResponse
 import com.evandhardspace.yacca.data.user.User
 import com.evandhardspace.yacca.data.user.UserDataSource
+import com.evandhardspace.yacca.response.RefreshRequest
 import com.evandhardspace.yacca.security.hashing.HashingService
 import com.evandhardspace.yacca.security.hashing.SaltedHash
 import com.evandhardspace.yacca.security.token.TokenClaim
@@ -61,36 +62,58 @@ fun Route.signIn(
         }
 
         val user = userDataSource.getUser(request.email)
-
-        if (user == null) {
+        if (user == null || !hashingService.verify(request.password, SaltedHash(user.hashedPassword, user.salt))) {
             call.respond(HttpStatusCode.Conflict, "Incorrect username or password")
             return@post
         }
 
-        val isValidPassword = hashingService.verify(
-            value = request.password,
-            saltedHash = SaltedHash(
-                user.hashedPassword,
-                user.salt,
-            )
-        )
+        val accessToken = tokenService.generateAccessToken(TokenClaim("userId", user.id.toString()))
+        val refreshToken = tokenService.generateRefreshToken(user.id)
 
-        if (!isValidPassword) {
-            call.respond(HttpStatusCode.Conflict, "Incorrect username or password")
-            return@post
-        }
-
-        val token = tokenService.generate(
-            TokenClaim(
-                name = "userId",
-                value = user.id.toString(),
-            ),
+        tokenService.storeRefreshToken(
+            user.id.toString(),
+            refreshToken = refreshToken,
         )
 
         call.respond(
-            status = HttpStatusCode.OK,
+            HttpStatusCode.OK,
             message = AuthResponse(
-                token = token,
+                accessToken = accessToken,
+                refreshToken = refreshToken.token,
+            )
+        )
+    }
+}
+
+fun Route.refreshToken(
+    tokenService: TokenService,
+) {
+    post("refresh") {
+        val request = runCatching { call.receive<RefreshRequest>() }.getOrElse {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
+
+        val decodedToken = tokenService.verifyRefreshToken(request.refreshToken)
+        if (decodedToken == null) {
+            call.respond(HttpStatusCode.Unauthorized, "Invalid refresh token")
+            return@post
+        }
+        val userId = decodedToken.getClaim("userId").asString()
+
+        val newAccessToken = tokenService.generateAccessToken(TokenClaim("userId", userId))
+        val newRefreshToken = tokenService.rotateRefreshToken(request.refreshToken)
+
+        if(newRefreshToken == null) {
+            call.respond(HttpStatusCode.Unauthorized, "Invalid or expired refresh token")
+            return@post
+        }
+
+        call.respond(
+            HttpStatusCode.OK,
+            message = AuthResponse(
+                accessToken = newAccessToken,
+                refreshToken = newRefreshToken.token,
             )
         )
     }
