@@ -22,3 +22,13 @@ object FavoriteCurrencies : Table("favorite_currencies") {
 
     override val primaryKey = PrimaryKey(id)
 }
+
+object RefreshTokens : Table("refresh_tokens") {
+    val id = uuid("id").autoGenerate()
+    val userId = uuid("user_id").references(Users.id)
+    val token = varchar("token", 512)
+    val expiresAt = datetime("expires_at")
+    val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
+
+    override val primaryKey: PrimaryKey = PrimaryKey(id)
+}

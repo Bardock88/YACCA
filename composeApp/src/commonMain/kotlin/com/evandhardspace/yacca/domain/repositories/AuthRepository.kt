@@ -13,7 +13,8 @@ internal class AuthRepository(
     }
 
     suspend fun signIn(email: String, password: String): Result<Unit> = runCatching {
-       val accessTokenResult =  authDataSource.signIn(email, password)
-        tokenDataSource.saveAccessToken(accessTokenResult.token)
+       val tokenResult = authDataSource.signIn(email, password)
+        tokenDataSource.saveAccessToken(tokenResult.accessToken)
+        tokenDataSource.saveRefreshToken(tokenResult.refreshToken)
     }
 }

@@ -84,14 +84,17 @@ internal class NetworkCurrencyDataSource(
 ) : CurrencyDataSource {
     override suspend fun allCurrencies(): List<CurrencyResponse> = networkClient
         .get<List<CurrencyResponse>>("$BASE_URL/currencies/public-info")
+        .getOrThrow()
         .body
 
     override suspend fun allUserCurrencies(): List<UserCurrencyResponse> = networkClient
         .get<List<UserCurrencyResponse>>("$BASE_URL/currencies/user-info", withAuth = true)
+        .getOrThrow()
         .body
 
     override suspend fun getFavouriteCurrencies(): List<CurrencyResponse> = networkClient
         .get<List<CurrencyResponse>>("$BASE_URL/favourites")
+        .getOrThrow()
         .body
 
     override suspend fun addToFavourites(currencyId: String) {
@@ -100,7 +103,7 @@ internal class NetworkCurrencyDataSource(
             withAuth = true,
             body = FavouriteCurrencyRequest(currencyId),
         )
-        if (result.isSuccess.not()) error("currency was not added to favourites") // todo add domain backend exception
+        if (result.getOrThrow().isResponseSuccessful.not()) error("currency was not added to favourites") // todo add domain backend exception
     }
 
     override suspend fun deleteFromFavourites(currencyId: String) {
@@ -108,6 +111,6 @@ internal class NetworkCurrencyDataSource(
             "$BASE_URL/favourites/$currencyId",
             withAuth = true,
         )
-        if (result.isSuccess.not()) error("currency was not added to favourites") // todo add domain backend exception
+        if (result.getOrThrow().isResponseSuccessful.not()) error("currency was not added to favourites") // todo add domain backend exception
     }
 }

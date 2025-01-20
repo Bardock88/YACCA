@@ -11,20 +11,30 @@ import com.evandhardspace.yacca.security.token.TokenConfig
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
 
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 fun Application.module() {
     initDatabase()
-    val tokenConfig = TokenConfig(
+    val accessTokenConfig = TokenConfig(
         issuer = environment.config.property("jwt.issuer").getString(),
         audience = environment.config.property("jwt.audience").getString(),
-        expiresIn = 365.days.inWholeMilliseconds, // todo extract
-        secret = environment.config.property("jwt.secret").getString(),
+        expiresIn = 15.minutes.inWholeMilliseconds, // todo extract
+        secret = environment.config.property("jwt.access-token-secret").getString(),
+    )
+    val refreshTokenConfig = TokenConfig(
+        issuer = environment.config.property("jwt.issuer").getString(),
+        audience = environment.config.property("jwt.audience").getString(),
+        expiresIn = 30.days.inWholeMilliseconds, // todo extract
+        secret = environment.config.property("jwt.refresh-token-secret").getString(),
     )
     val client = buildHttpClient()
 
-    val tokenService = JwtTokenService(config = tokenConfig)
+    val tokenService = JwtTokenService(
+        accessTokenConfig = accessTokenConfig,
+        refreshTokenConfig = refreshTokenConfig,
+    )
     val hashingService = SHA256HashingService()
     val currencyService = CurrencyService(client = client)
 

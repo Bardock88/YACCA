@@ -30,5 +30,5 @@ internal class NetworkAuthDataSource(
                 email = email,
                 password = password,
             )
-        ).body
+        ).getOrThrow().body
 }
