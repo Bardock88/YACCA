@@ -11,17 +11,13 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 interface CurrencyDataSource {
-
     suspend fun allCurrencies(): List<CurrencyResponse>
-
     suspend fun addFavouriteCurrency(userId: UUID, currencyId: String): Boolean
-
     suspend fun deleteFavouriteCurrency(userId: UUID, currencyId: String): Boolean
-
     suspend fun getFavouriteCurrencies(userId: UUID): List<CurrencyResponse>?
-
     suspend fun allUserCurrencies(userId: UUID): List<UserCurrencyResponse>?
 }
 
@@ -102,3 +98,36 @@ private fun CurrencyResponse.asResponse(favouriteCurrenciesIds: Set<String>): Us
         priceUsd = priceUsd,
         isFavourite = id in favouriteCurrenciesIds,
     )
+
+class InMemoryCurrencyDataSource(
+    private val currencyService: CurrencyService,
+) : CurrencyDataSource {
+    private val favoriteCurrencies = ConcurrentHashMap<UUID, MutableSet<String>>()
+
+    override suspend fun allCurrencies(): List<CurrencyResponse> =
+        currencyService.allCurrencies().data.map(CurrencyResource::asResponse)
+
+    override suspend fun addFavouriteCurrency(userId: UUID, currencyId: String): Boolean {
+        favoriteCurrencies.computeIfAbsent(userId) { mutableSetOf() }.add(currencyId)
+        return true
+    }
+
+    override suspend fun allUserCurrencies(userId: UUID): List<UserCurrencyResponse>? {
+        val favouriteCurrenciesIds = favoriteCurrencies[userId] ?: emptySet()
+
+        return allCurrencies().map { it.asResponse(favouriteCurrenciesIds) }
+    }
+
+    override suspend fun deleteFavouriteCurrency(userId: UUID, currencyId: String): Boolean {
+        favoriteCurrencies[userId]?.remove(currencyId)
+        return true
+    }
+
+    override suspend fun getFavouriteCurrencies(userId: UUID): List<CurrencyResponse>? {
+        val favouriteCurrenciesIds = favoriteCurrencies[userId] ?: return emptyList()
+
+        if (favouriteCurrenciesIds.isEmpty()) return emptyList()
+        return currencyService.filteredCurrencies(favouriteCurrenciesIds)
+            .data.map(CurrencyResource::asResponse)
+    }
+}

@@ -3,22 +3,18 @@ package com.evandhardspace.yacca.security.token
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.DecodedJWT
-import com.evandhardspace.yacca.db.RefreshTokens
+import com.evandhardspace.yacca.data.token.JwtTokenDataSource
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toKotlinInstant
 import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.Date
 import java.util.UUID
 
-class JwtTokenService(
+internal class JwtTokenService(
     private val accessTokenConfig: TokenConfig,
     private val refreshTokenConfig: TokenConfig,
+    private val jwtTokenDataSource: JwtTokenDataSource,
 ) : TokenService {
     override fun generateAccessToken(vararg claims: TokenClaim): String {
         var token = JWT.create()
@@ -55,8 +51,10 @@ class JwtTokenService(
             id = UUID.randomUUID(),
             userId,
             token,
-            expiresAt = expiresAt.toInstant().toKotlinInstant().toLocalDateTime(TimeZone.currentSystemDefault()), // todo
-            createdAt = Instant.fromEpochMilliseconds(System.currentTimeMillis()).toLocalDateTime(TimeZone.currentSystemDefault())
+            expiresAt = expiresAt.toInstant().toKotlinInstant()
+                .toLocalDateTime(TimeZone.currentSystemDefault()), // todo
+            createdAt = Instant.fromEpochMilliseconds(System.currentTimeMillis())
+                .toLocalDateTime(TimeZone.currentSystemDefault())
         )
     }
 
@@ -70,32 +68,18 @@ class JwtTokenService(
     }
 
     override fun storeRefreshToken(userId: String, refreshToken: RefreshToken) {
-        transaction {
-            RefreshTokens.insert {
-                it[id] = refreshToken.id
-                it[this.userId] = UUID.fromString(userId)
-                it[token] = refreshToken.token
-                it[expiresAt] = refreshToken.expiresAt
-                it[createdAt] = refreshToken.createdAt
-            }
-        }
+        jwtTokenDataSource.storeRefreshToken(userId, refreshToken)
     }
 
     override fun rotateRefreshToken(oldToken: String): RefreshToken? {
-        return transaction {
-            val existingToken = RefreshTokens.select { RefreshTokens.token eq oldToken }.singleOrNull()?.get(RefreshTokens.token)
-                ?: return@transaction null
+        val existingToken = jwtTokenDataSource.getToken(oldToken) ?: return null
+        val decodedToken = verifyRefreshToken(existingToken) ?: return null
+        val userId = decodedToken.getClaim("userId").asString() ?: return null
 
-            val decodedToken = verifyRefreshToken(existingToken) ?: return@transaction null
+        jwtTokenDataSource.deleteToken(oldToken)
+        val refreshToken = generateRefreshToken(UUID.fromString(userId))
 
-            val userId = decodedToken.getClaim("userId").asString() ?: return@transaction null
-
-            RefreshTokens.deleteWhere { token eq oldToken }
-
-            val refreshToken = generateRefreshToken(UUID.fromString(userId))
-
-            storeRefreshToken(userId, refreshToken)
-            refreshToken
-        }
+        storeRefreshToken(userId, refreshToken)
+        return refreshToken
     }
 }
