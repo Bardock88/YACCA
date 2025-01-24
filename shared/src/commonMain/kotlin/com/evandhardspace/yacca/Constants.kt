@@ -1,6 +1,6 @@
 package com.evandhardspace.yacca
 
-internal expect val localHost: String
+expect val localHost: String
 
 object Endpoints {
     const val SIGNUP = "signup"
@@ -17,8 +17,8 @@ object Endpoints {
 object Config {
     val isLocalImplementation: Boolean = BuildKonfig.isLocalImplementation
 
-    val BASE_URL: String = if(BuildKonfig.isEmulatorLocalhost) {
-        "$localHost:${BuildKonfig.serverLocalPort}"
-    } else BuildKonfig.baseUrl.takeUnless { it.isEmpty() }
-        ?: error("emulator.localhost is false but local property server.host is not set")
+//    val BASE_URL: String = if(BuildKonfig.isEmulatorLocalhost) {
+//        "$localHost:${BuildKonfig.serverLocalPort}"
+//    } else BuildKonfig.baseUrl.takeUnless { it.isEmpty() }
+//        ?: error("emulator.localhost is false but local property server.host is not set")
 }

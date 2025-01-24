@@ -1,6 +1,6 @@
 package com.evandhardspace.yacca.data.datasources
 
-import com.evandhardspace.yacca.Config.BASE_URL
+import com.evandhardspace.yacca.MobileConfig.BASE_URL
 import com.evandhardspace.yacca.Endpoints
 import com.evandhardspace.yacca.data.database.CurrencyDao
 import com.evandhardspace.yacca.data.database.CurrencyEntity

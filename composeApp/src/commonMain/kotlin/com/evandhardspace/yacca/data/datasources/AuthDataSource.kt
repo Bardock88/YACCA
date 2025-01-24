@@ -1,7 +1,7 @@
 package com.evandhardspace.yacca.data.datasources
 
-import com.evandhardspace.yacca.Config
 import com.evandhardspace.yacca.Endpoints
+import com.evandhardspace.yacca.MobileConfig.BASE_URL
 import com.evandhardspace.yacca.request.AuthRequest
 import com.evandhardspace.yacca.response.AuthResponse
 import com.evandhardspace.yacca.utils.client.NetworkClient
@@ -16,7 +16,7 @@ internal class NetworkAuthDataSource(
 ) : AuthDataSource {
     override suspend fun signUp(email: String, password: String) {
         networkClient.post<AuthRequest, Unit>(
-            "${Config.BASE_URL}/${Endpoints.SIGNUP}",
+            "${BASE_URL}/${Endpoints.SIGNUP}",
             body = AuthRequest(
                 email = email,
                 password = password,
@@ -26,7 +26,7 @@ internal class NetworkAuthDataSource(
 
     override suspend fun signIn(email: String, password: String): AuthResponse =
         networkClient.post<AuthRequest, AuthResponse>(
-            "${Config.BASE_URL}/${Endpoints.SIGNIN}",
+            "${BASE_URL}/${Endpoints.SIGNIN}",
             body = AuthRequest(
                 email = email,
                 password = password,
