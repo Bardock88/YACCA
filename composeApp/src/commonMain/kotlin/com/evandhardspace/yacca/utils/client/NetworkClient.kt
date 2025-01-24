@@ -1,6 +1,7 @@
 package com.evandhardspace.yacca.utils.client
 
 import com.evandhardspace.yacca.BASE_URL
+import com.evandhardspace.yacca.Endpoints
 import com.evandhardspace.yacca.data.datasources.TokenDataSource
 import com.evandhardspace.yacca.data.network.auth
 import com.evandhardspace.yacca.presentation.SessionEffect
@@ -11,7 +12,6 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import org.lighthousegames.logging.logging
 
@@ -26,7 +26,6 @@ internal class NetworkClient(
         urlString: String,
         withAuth: Boolean = false,
     ): NetworkResult<Response> = executeRequest<Response> {
-        logging.d { "GET request invoked" }
         client.get(urlString) {
             if (withAuth) auth(tokenDataSource)
         }
@@ -37,7 +36,6 @@ internal class NetworkClient(
         body: Request? = null,
         withAuth: Boolean = false,
     ): NetworkResult<Response> = executeRequest<Response> {
-        logging.d { "POST request invoked" }
         client.post(urlString) {
             body?.let { setBody(it) }
             if (withAuth) auth(tokenDataSource)
@@ -48,7 +46,6 @@ internal class NetworkClient(
         urlString: String,
         withAuth: Boolean = false,
     ): NetworkResult<Response> = executeRequest<Response> {
-        logging.d { "DELETE request invoked" }
         client.delete(urlString) {
             if (withAuth) auth(tokenDataSource)
         }
@@ -109,15 +106,12 @@ internal class NetworkClient(
         val refreshToken = tokenDataSource.getRefreshToken() ?: return false
 
         val refreshResponse = runCatching {
-            client.post("$BASE_URL/refresh") {
+            client.post("$BASE_URL/${Endpoints.REFRESH}") {
                 setBody(RefreshRequest(refreshToken))
             }
         }.getOrNull()
 
-        logging.d { "2: $refreshResponse"}
-
         return if (refreshResponse != null && refreshResponse.status.isSuccess()) {
-            logging.d { "1: ${refreshResponse.bodyAsText()}"}
             val tokens = refreshResponse.body<AuthResponse>()
             tokenDataSource.saveAccessToken(tokens.accessToken)
             tokenDataSource.saveRefreshToken(tokens.refreshToken)

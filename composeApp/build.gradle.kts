@@ -32,13 +32,15 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
-            implementation(libs.ktor.client.okhttp)
             implementation(libs.kotlinx.coroutines.android)
+            implementation(libs.ktor.client.okhttp)
 
             implementation(libs.koin.android)
             implementation(libs.encryptedSharedPreferences)
         }
         commonMain.dependencies {
+            implementation(projects.shared)
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -48,37 +50,17 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(projects.shared)
 
             implementation(libs.serialization)
             implementation(libs.kotlinx.coroutines.core)
-
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.json)
-            implementation(libs.ktor.client.serialization)
-            implementation(libs.ktor.client.serializationJson)
-            implementation(libs.ktor.client.contentNegotiation)
-            implementation(libs.ktor.client.logging)
-            implementation(libs.ktor.client.auth)
             implementation(libs.kmpLogging)
 
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose)
-            implementation(libs.koin.composeViewModel)
-            implementation(libs.koin.composeViewModelNavigation)
+            implementation(libs.bundles.mobile.ktorClient)
+            implementation(libs.bundles.mobile.koin)
+            implementation(libs.bundles.mobile.persistence)
 
-            implementation(libs.dataStore.preferences)
-
-            implementation(libs.kotlinx.coroutines.core)
-
-            implementation(libs.kmpSettigns)
             // fixes transitive dependency
             implementation(libs.stately.common)
-
-            implementation(libs.room.runtime)
-            implementation(libs.sqlite.bundled)
-
-
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

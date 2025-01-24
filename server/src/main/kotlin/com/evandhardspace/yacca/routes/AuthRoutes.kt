@@ -1,5 +1,6 @@
 package com.evandhardspace.yacca.routes
 
+import com.evandhardspace.yacca.Endpoints
 import com.evandhardspace.yacca.request.AuthRequest
 import com.evandhardspace.yacca.response.AuthResponse
 import com.evandhardspace.yacca.data.user.User
@@ -19,7 +20,7 @@ fun Route.signUp(
     hashingService: HashingService,
     userDataSource: UserDataSource,
 ) {
-    post("signup") {
+    post(Endpoints.SIGNUP) {
         val request = runCatching { call.receive<AuthRequest>() }.getOrElse {
             call.respond(HttpStatusCode.BadRequest)
             return@post
@@ -55,7 +56,7 @@ fun Route.signIn(
     hashingService: HashingService,
     tokenService: TokenService,
 ) {
-    post("signin") {
+    post(Endpoints.SIGNIN) {
         val request = runCatching { call.receive<AuthRequest>() }.getOrElse {
             call.respond(HttpStatusCode.BadRequest)
             return@post
@@ -88,7 +89,7 @@ fun Route.signIn(
 fun Route.refreshToken(
     tokenService: TokenService,
 ) {
-    post("refresh") {
+    post(Endpoints.REFRESH) {
         val request = runCatching { call.receive<RefreshRequest>() }.getOrElse {
             call.respond(HttpStatusCode.BadRequest)
             return@post

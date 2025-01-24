@@ -1,5 +1,6 @@
 package com.evandhardspace.yacca.routes
 
+import com.evandhardspace.yacca.Endpoints
 import com.evandhardspace.yacca.data.currency.CurrencyDataSource
 import com.evandhardspace.yacca.request.FavouriteCurrencyRequest
 import com.evandhardspace.yacca.utils.userId
@@ -13,13 +14,13 @@ import java.util.*
 fun Route.currencies(
     currencyDataSource: CurrencyDataSource,
 ) {
-    get("currencies/public-info") {
+    get(Endpoints.CURRENCIES_PUBLIC_INFO) {
         val currencies = currencyDataSource.allCurrencies()
         call.respond(HttpStatusCode.OK, currencies)
     }
 
     authenticate {
-        get("currencies/user-info") {
+        get(Endpoints.CURRENCIES_USER_INFO) {
             val userId = call.userId ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
@@ -32,7 +33,7 @@ fun Route.currencies(
             call.respond(HttpStatusCode.OK, favouriteCurrencies)
         }
 
-        get("favourites") {
+        get(Endpoints.FAVOURITES) {
             val userId = call.userId ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
@@ -45,7 +46,7 @@ fun Route.currencies(
             call.respond(HttpStatusCode.OK, favouriteCurrencies)
         }
 
-        post("favourites") {
+        post(Endpoints.FAVOURITES) {
             val request = runCatching { call.receive<FavouriteCurrencyRequest>() }.getOrElse {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
@@ -65,8 +66,7 @@ fun Route.currencies(
             call.respond(HttpStatusCode.OK)
         }
 
-        // todo check
-        delete("favourites/{id}") {
+        delete("${Endpoints.FAVOURITES}/{id}") {
             val favouriteCurrencyId = call.parameters["id"] ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@delete
