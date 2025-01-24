@@ -1,6 +1,7 @@
 package com.evandhardspace.yacca.data.datasources
 
 import com.evandhardspace.yacca.BASE_URL
+import com.evandhardspace.yacca.Endpoints
 import com.evandhardspace.yacca.data.database.CurrencyDao
 import com.evandhardspace.yacca.data.database.CurrencyEntity
 import com.evandhardspace.yacca.domain.models.Currency
@@ -83,23 +84,23 @@ internal class NetworkCurrencyDataSource(
     private val networkClient: NetworkClient,
 ) : CurrencyDataSource {
     override suspend fun allCurrencies(): List<CurrencyResponse> = networkClient
-        .get<List<CurrencyResponse>>("$BASE_URL/currencies/public-info")
+        .get<List<CurrencyResponse>>("$BASE_URL/${Endpoints.CURRENCIES_PUBLIC_INFO}")
         .getOrThrow()
         .body
 
     override suspend fun allUserCurrencies(): List<UserCurrencyResponse> = networkClient
-        .get<List<UserCurrencyResponse>>("$BASE_URL/currencies/user-info", withAuth = true)
+        .get<List<UserCurrencyResponse>>("$BASE_URL/${Endpoints.CURRENCIES_USER_INFO}", withAuth = true)
         .getOrThrow()
         .body
 
     override suspend fun getFavouriteCurrencies(): List<CurrencyResponse> = networkClient
-        .get<List<CurrencyResponse>>("$BASE_URL/favourites")
+        .get<List<CurrencyResponse>>("$BASE_URL/${Endpoints.FAVOURITES}")
         .getOrThrow()
         .body
 
     override suspend fun addToFavourites(currencyId: String) {
         val result: NetworkResult<Unit> = networkClient.post(
-            "$BASE_URL/favourites",
+            "$BASE_URL/${Endpoints.FAVOURITES}",
             withAuth = true,
             body = FavouriteCurrencyRequest(currencyId),
         )
@@ -108,7 +109,7 @@ internal class NetworkCurrencyDataSource(
 
     override suspend fun deleteFromFavourites(currencyId: String) {
         val result: NetworkResult<Unit> = networkClient.delete(
-            "$BASE_URL/favourites/$currencyId",
+            "$BASE_URL/${Endpoints.FAVOURITES}/$currencyId",
             withAuth = true,
         )
         if (result.getOrThrow().isResponseSuccessful.not()) error("currency was not added to favourites") // todo add domain backend exception
