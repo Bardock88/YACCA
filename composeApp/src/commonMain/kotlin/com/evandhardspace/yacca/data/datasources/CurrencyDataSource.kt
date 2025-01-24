@@ -1,6 +1,6 @@
 package com.evandhardspace.yacca.data.datasources
 
-import com.evandhardspace.yacca.BASE_URL
+import com.evandhardspace.yacca.Config.BASE_URL
 import com.evandhardspace.yacca.Endpoints
 import com.evandhardspace.yacca.data.database.CurrencyDao
 import com.evandhardspace.yacca.data.database.CurrencyEntity
@@ -11,7 +11,6 @@ import com.evandhardspace.yacca.response.CurrencyResponse
 import com.evandhardspace.yacca.response.UserCurrencyResponse
 import com.evandhardspace.yacca.utils.client.NetworkClient
 import com.evandhardspace.yacca.utils.client.NetworkResult
-import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
