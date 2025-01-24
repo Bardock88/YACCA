@@ -1,4 +1,4 @@
 package com.evandhardspace.yacca
 
-internal actual val localHost: String
+actual val localHost: String
     get() = "http://localhost"
