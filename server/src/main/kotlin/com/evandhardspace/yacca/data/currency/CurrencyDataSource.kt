@@ -21,7 +21,7 @@ interface CurrencyDataSource {
     suspend fun allUserCurrencies(userId: UUID): List<UserCurrencyResponse>?
 }
 
-class DefaultCurrencyDataSource(
+class DatabaseCurrencyDataSource(
     private val currencyService: CurrencyService,
 ) : CurrencyDataSource {
     override suspend fun allCurrencies(): List<CurrencyResponse> = currencyService

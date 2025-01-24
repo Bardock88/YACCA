@@ -1,6 +1,6 @@
 package com.evandhardspace.yacca.utils.client
 
-import com.evandhardspace.yacca.BASE_URL
+import com.evandhardspace.yacca.Config.BASE_URL
 import com.evandhardspace.yacca.Endpoints
 import com.evandhardspace.yacca.data.datasources.TokenDataSource
 import com.evandhardspace.yacca.data.network.auth

@@ -1,6 +1,6 @@
 package com.evandhardspace.yacca
 
-const val BASE_URL = "https://yacca-9df0a5ceac73.herokuapp.com"
+internal expect val localHost: String
 
 object Endpoints {
     const val SIGNUP = "signup"
@@ -12,4 +12,13 @@ object Endpoints {
 
     const val FAVOURITES = "favourites"
     const val USER = "user"
+}
+
+object Config {
+    val isLocalImplementation: Boolean = BuildKonfig.isLocalImplementation
+
+    val BASE_URL: String = if(BuildKonfig.isEmulatorLocalhost) {
+        "$localHost:${BuildKonfig.serverLocalPort}"
+    } else BuildKonfig.baseUrl.takeUnless { it.isEmpty() }
+        ?: error("emulator.localhost is false but local property server.host is not set")
 }
