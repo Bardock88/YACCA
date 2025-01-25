@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -45,7 +47,21 @@ fun App() = YaccaApplication {
     MaterialTheme {
 
         Scaffold(
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                ) { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        containerColor = if (data.visuals.message.contains("Error:"))
+                            MaterialTheme.colorScheme.errorContainer
+                        else SnackbarDefaults.color,
+                        contentColor = if (data.visuals.message.contains("Error:"))
+                            MaterialTheme.colorScheme.onBackground
+                        else SnackbarDefaults.contentColor
+                    )
+                }
+            },
             bottomBar = { BottomNavigationBar(navController) }
         ) { innerPaddings ->
             NavigationHost(
@@ -53,11 +69,11 @@ fun App() = YaccaApplication {
                     .consumeWindowInsets(WindowInsets.systemBars)
                     .padding(innerPaddings),
                 navController = navController,
-                showSnackbar = { message ->
+                showSnackbar = { message, isError ->
                     snackbarJob?.cancel()
                     snackbarJob = coroutineScope.launch {
                         snackbarHostState.showSnackbar(
-                            message = message,
+                            message = if (isError) "Error: $message" else message,
                             duration = SnackbarDuration.Short
                         )
                     }

@@ -44,15 +44,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.evandhardspace.yacca.presentation.login.LoginScreen
 import com.evandhardspace.yacca.ui.CurrencyCard
+import com.evandhardspace.yacca.utils.OnEffect
 import com.evandhardspace.yacca.utils.pxAsDp
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 internal fun HomeRoute(
-    noDisabledLikeClick: (message: String) -> Unit,
+    onSnackbarClick: (message: String, isError: Boolean) -> Unit,
 ) {
     HomeScreen(
-        onDisabledLikeClick = { noDisabledLikeClick("Login to add favourite currencies") },
+        onDisabledLikeClick = { onSnackbarClick("Login to add favourite currencies", false) },
+        onError = { message -> onSnackbarClick(message, true) }
     ) { onLoggedIn ->
         LoginScreen(
             modifier = Modifier.fillMaxWidth(),
@@ -66,9 +68,18 @@ internal fun HomeRoute(
 private fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
     onDisabledLikeClick: () -> Unit,
+    onError: (String) -> Unit,
     authBottomSheetContent: @Composable (onLoggedIn: () -> Unit) -> Unit,
 ) {
     val uiState by viewModel.viewState.collectAsStateWithLifecycle()
+
+    OnEffect(viewModel.effect) { effect ->
+        when (effect) {
+            is HomeScreenEffect.UnableToAdd -> onError("Unable to add to favourites.")
+            is HomeScreenEffect.UnableToDelete -> onError("Unable to delete from favourites.")
+            is HomeScreenEffect.UnableToUpdate -> onError("Unable to update currencies.")
+        }
+    }
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showAuthSheet by remember { mutableStateOf(false) }

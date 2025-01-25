@@ -75,6 +75,7 @@ internal class CurrencyRepository(
                 }
                 result.onFailure {
                     localCurrenciesDataSource.updateFavourite(currencyId, false)
+                    error("unable add to favourites")
                 }
                 Unit
             }
@@ -89,6 +90,7 @@ internal class CurrencyRepository(
                 }
                 result.onFailure {
                     localCurrenciesDataSource.updateFavourite(currencyId, true)
+                    error("unable delete from favourites")
                 }
                 Unit
             }

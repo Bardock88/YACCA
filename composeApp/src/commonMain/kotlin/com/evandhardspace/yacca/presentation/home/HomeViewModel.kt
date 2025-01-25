@@ -1,12 +1,14 @@
 package com.evandhardspace.yacca.presentation.home
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.evandhardspace.yacca.domain.models.Currency
 import com.evandhardspace.yacca.domain.repositories.CurrencyRepository
 import com.evandhardspace.yacca.domain.repositories.UserRepository
+import com.evandhardspace.yacca.utils.EffectViewModel
 import com.evandhardspace.yacca.utils.formatToNDecimalPlaces
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -15,7 +17,7 @@ import kotlinx.coroutines.launch
 internal class HomeViewModel(
     private val currencyRepository: CurrencyRepository,
     userRepository: UserRepository,
-) : ViewModel() {
+) : EffectViewModel<HomeScreenEffect>() {
 
     private val _viewState = MutableStateFlow(
         HomeScreenState(
@@ -28,19 +30,7 @@ internal class HomeViewModel(
     init {
         currencyRepository.allCurrencies().onEach { currencies ->
             _viewState.update { state ->
-                state.copy(
-                    currencyState = CurrencyState.CurrencyLoaded(
-                        currencies.map {
-                            CurrencyUi(
-                                id = it.id,
-                                name = it.name,
-                                symbol = it.symbol,
-                                price = "$${it.priceUsd.formatToNDecimalPlaces(3)}",
-                                isFavourite = it.isFavourite,
-                            )
-                        }
-                    )
-                )
+                state.copy(currencyState = currencies.mapToCurrencyLoaded())
             }
         }.launchIn(viewModelScope)
 
@@ -61,10 +51,17 @@ internal class HomeViewModel(
             _viewState.update {
                 it.copy(currencyState = CurrencyState.Loading)
             }
-            currencyRepository.fetchCurrencies().fold(
-                onSuccess = { /* todo */ },
-                onFailure = { /* todo */ },
-            )
+            currencyRepository.fetchCurrencies()
+                .onFailure { HomeScreenEffect.UnableToUpdate.send() }
+
+            _viewState.update { state ->
+                state.copy(
+                    currencyState = currencyRepository
+                        .allCurrencies()
+                        .first()
+                        .mapToCurrencyLoaded()
+                )
+            }
         }
     }
 
@@ -82,17 +79,28 @@ internal class HomeViewModel(
 
     private suspend fun addToFavourite(currencyId: String) {
         currencyRepository.addToFavourites(currencyId)
-            .fold(
-                onSuccess = { /* todo */ },
-                onFailure = { /* todo */ },
-            )
+            .onFailure {
+                HomeScreenEffect.UnableToAdd.send()
+            }
     }
 
     private suspend fun deleteFromFavourites(currencyId: String) {
         currencyRepository.deleteFromFavourites(currencyId)
-            .fold(
-                onSuccess = { /* todo */ },
-                onFailure = { /* todo */ },
-            )
+            .onFailure {
+                HomeScreenEffect.UnableToDelete.send()
+            }
     }
 }
+
+private fun List<Currency>.mapToCurrencyLoaded(): CurrencyState.CurrencyLoaded =
+    CurrencyState.CurrencyLoaded(
+        currencies = map {
+            CurrencyUi(
+                id = it.id,
+                name = it.name,
+                symbol = it.symbol,
+                price = "$${it.priceUsd.formatToNDecimalPlaces(3)}",
+                isFavourite = it.isFavourite,
+            )
+        }
+    )
