@@ -1,7 +1,8 @@
 package com.evandhardspace.yacca.routes
 
+import com.evandhardspace.yacca.Endpoints
 import com.evandhardspace.yacca.data.currency.CurrencyDataSource
-import com.evandhardspace.yacca.data.request.FavouriteCurrencyRequest
+import com.evandhardspace.yacca.request.FavouriteCurrencyRequest
 import com.evandhardspace.yacca.utils.userId
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -13,13 +14,26 @@ import java.util.*
 fun Route.currencies(
     currencyDataSource: CurrencyDataSource,
 ) {
-    get("currencies") {
+    get(Endpoints.CURRENCIES_PUBLIC_INFO) {
         val currencies = currencyDataSource.allCurrencies()
         call.respond(HttpStatusCode.OK, currencies)
     }
 
     authenticate {
-        get("favourites") {
+        get(Endpoints.CURRENCIES_USER_INFO) {
+            val userId = call.userId ?: run {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@get
+            }
+
+            val favouriteCurrencies = currencyDataSource.allUserCurrencies(UUID.fromString(userId)) ?: run {
+                call.respond(HttpStatusCode.Conflict) // todo check if status is correct
+                return@get
+            }
+            call.respond(HttpStatusCode.OK, favouriteCurrencies)
+        }
+
+        get(Endpoints.FAVOURITES) {
             val userId = call.userId ?: run {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@get
@@ -32,7 +46,7 @@ fun Route.currencies(
             call.respond(HttpStatusCode.OK, favouriteCurrencies)
         }
 
-        post("favourites") {
+        post(Endpoints.FAVOURITES) {
             val request = runCatching { call.receive<FavouriteCurrencyRequest>() }.getOrElse {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
@@ -52,8 +66,7 @@ fun Route.currencies(
             call.respond(HttpStatusCode.OK)
         }
 
-        // todo check
-        delete("favourites/{id}") {
+        delete("${Endpoints.FAVOURITES}/{id}") {
             val favouriteCurrencyId = call.parameters["id"] ?: run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@delete

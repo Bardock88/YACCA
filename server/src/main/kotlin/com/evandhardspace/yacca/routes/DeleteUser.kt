@@ -1,5 +1,6 @@
 package com.evandhardspace.yacca.routes
 
+import com.evandhardspace.yacca.Endpoints
 import com.evandhardspace.yacca.data.user.UserDataSource
 import com.evandhardspace.yacca.utils.userId
 import io.ktor.http.*
@@ -12,7 +13,7 @@ fun Route.deleteUser(
     userDataSource: UserDataSource,
 ) {
     authenticate {
-        delete("user") {
+        delete(Endpoints.USER) {
             val userId = call.userId
             val isUserDeleted = userDataSource.deleteUser(UUID.fromString(userId))
 
