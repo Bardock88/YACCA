@@ -119,9 +119,6 @@ buildkonfig {
 
         val properties = loadLocalProperties()
 
-        val isLocalImplementationValue = properties["server.mockLocally"].toString().toBool()
-        buildConfigField(FieldSpec.Type.BOOLEAN, "isLocalImplementation", isLocalImplementationValue.toString())
-
         val isEmulatorLocalhost = properties["emulator.localhost"].toString().toBool()
         buildConfigField(FieldSpec.Type.BOOLEAN, "isEmulatorLocalhost", isEmulatorLocalhost.toString())
 
