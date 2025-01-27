@@ -28,10 +28,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.evandhardspace.yacca.presentation.AppEffect
+import com.evandhardspace.yacca.presentation.SnackbarSendChannel
 import com.evandhardspace.yacca.presentation.home.CurrencyState
 import com.evandhardspace.yacca.presentation.home.CurrencyUi
 import com.evandhardspace.yacca.ui.CurrencyCard
 import com.evandhardspace.yacca.utils.OnEffect
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -46,13 +49,17 @@ internal fun FavouritesRoute(
 @Composable
 private fun FavouriteCurrenciesScreenScreen(
     viewModel: FavouriteCurrenciesViewModel = koinViewModel(),
+    snackbarSendChannel: SnackbarSendChannel = koinInject(), // todo move to viewmodel
     onLoggedOut: () -> Unit,
 ) {
     val uiState by viewModel.viewState.collectAsStateWithLifecycle()
 
     OnEffect(viewModel.effect) { effect ->
         when (effect) {
-            FavouriteCurrenciesEffect.LoggedOut -> onLoggedOut()
+            FavouriteCurrenciesEffect.LoggedOut -> {
+                snackbarSendChannel.send(AppEffect.SnackbarEffect.General("You are logged out."))
+                onLoggedOut()
+            }
         }
     }
 

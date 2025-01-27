@@ -4,6 +4,9 @@ import androidx.lifecycle.viewModelScope
 import com.evandhardspace.yacca.domain.models.Currency
 import com.evandhardspace.yacca.domain.repositories.CurrencyRepository
 import com.evandhardspace.yacca.domain.repositories.UserRepository
+import com.evandhardspace.yacca.presentation.AppEffect.*
+import com.evandhardspace.yacca.presentation.SnackbarSendChannel
+import com.evandhardspace.yacca.presentation.SnackbarState
 import com.evandhardspace.yacca.utils.EffectViewModel
 import com.evandhardspace.yacca.utils.formatToNDecimalPlaces
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +20,7 @@ import kotlinx.coroutines.launch
 internal class HomeViewModel(
     private val currencyRepository: CurrencyRepository,
     userRepository: UserRepository,
+    private val snackbarChannel: SnackbarSendChannel,
 ) : EffectViewModel<HomeScreenEffect>() {
 
     private val _viewState = MutableStateFlow(
@@ -43,6 +47,18 @@ internal class HomeViewModel(
 
         viewModelScope.launch {
             currencyRepository.fetchCurrencies()
+        }
+    }
+
+    fun sendSnackbar(message: String, effect: SnackbarState) {
+        viewModelScope.launch {
+            snackbarChannel.send(
+                when (effect) {
+                    SnackbarState.Error -> SnackbarEffect.Error(message)
+                    SnackbarState.General -> SnackbarEffect.General(message)
+                    SnackbarState.Success -> SnackbarEffect.Success(message)
+                }
+            )
         }
     }
 
@@ -79,16 +95,12 @@ internal class HomeViewModel(
 
     private suspend fun addToFavourite(currencyId: String) {
         currencyRepository.addToFavourites(currencyId)
-            .onFailure {
-                HomeScreenEffect.UnableToAdd.send()
-            }
+            .onFailure { HomeScreenEffect.UnableToAdd.send() }
     }
 
     private suspend fun deleteFromFavourites(currencyId: String) {
         currencyRepository.deleteFromFavourites(currencyId)
-            .onFailure {
-                HomeScreenEffect.UnableToDelete.send()
-            }
+            .onFailure { HomeScreenEffect.UnableToDelete.send() }
     }
 }
 

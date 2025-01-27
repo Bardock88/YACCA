@@ -16,7 +16,11 @@ import com.evandhardspace.yacca.domain.CleanUpManager
 import com.evandhardspace.yacca.domain.repositories.AuthRepository
 import com.evandhardspace.yacca.domain.repositories.CurrencyRepository
 import com.evandhardspace.yacca.domain.repositories.UserRepository
-import com.evandhardspace.yacca.presentation.SessionRepository
+import com.evandhardspace.yacca.presentation.AppEffectChannel
+import com.evandhardspace.yacca.presentation.SessionReceiveChannel
+import com.evandhardspace.yacca.presentation.SessionSendChannel
+import com.evandhardspace.yacca.presentation.SnackbarReceiveChannel
+import com.evandhardspace.yacca.presentation.SnackbarSendChannel
 import com.evandhardspace.yacca.presentation.favourites.FavouriteCurrenciesViewModel
 import com.evandhardspace.yacca.presentation.home.HomeViewModel
 import com.evandhardspace.yacca.presentation.login.LoginViewModel
@@ -36,6 +40,7 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
+import org.koin.dsl.binds
 import org.koin.dsl.module
 
 private val networkModule = module {
@@ -77,7 +82,12 @@ private val repositoryModule = module {
     factoryOf(::UserRepository)
     factoryOf(::AuthRepository)
     factoryOf(::CleanUpManager)
-    singleOf(::SessionRepository)
+    singleOf(::AppEffectChannel) binds arrayOf(
+        SessionSendChannel::class,
+        SessionReceiveChannel::class,
+        SnackbarSendChannel::class,
+        SnackbarReceiveChannel::class,
+    )
 }
 
 private val persistenceModule = module {

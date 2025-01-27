@@ -11,14 +11,18 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
 
-interface Effect
+internal interface Effect
 
-abstract class EffectViewModel<E : Effect> : ViewModel() {
+internal interface EffectHolder<out E: Effect> {
+    val effect: Flow<E>
+}
+
+internal abstract class EffectViewModel<E : Effect> : ViewModel(), EffectHolder<E> {
     private val _effect = Channel<E>(
         capacity = Channel.BUFFERED,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
-    val effect: Flow<E> = _effect
+    override val effect: Flow<E> = _effect
         .receiveAsFlow()
         .shareIn(
             scope = viewModelScope,

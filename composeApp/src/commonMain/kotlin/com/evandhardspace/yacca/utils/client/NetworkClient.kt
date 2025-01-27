@@ -4,8 +4,8 @@ import com.evandhardspace.yacca.MobileConfig.BASE_URL
 import com.evandhardspace.yacca.Endpoints
 import com.evandhardspace.yacca.data.datasources.TokenDataSource
 import com.evandhardspace.yacca.data.network.auth
-import com.evandhardspace.yacca.presentation.SessionEffect
-import com.evandhardspace.yacca.presentation.SessionRepository
+import com.evandhardspace.yacca.presentation.AppEffect.SessionEffect
+import com.evandhardspace.yacca.presentation.SessionSendChannel
 import com.evandhardspace.yacca.response.AuthResponse
 import com.evandhardspace.yacca.response.RefreshRequest
 import io.ktor.client.*
@@ -20,7 +20,7 @@ private const val UnauthorizedCode = 401
 internal class NetworkClient(
     private val client: HttpClient,
     private val tokenDataSource: TokenDataSource,
-    private val sessionRepository: SessionRepository,
+    private val sessionRepository: SessionSendChannel,
 ) {
     suspend inline fun <reified Response> get(
         urlString: String,

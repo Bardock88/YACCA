@@ -42,6 +42,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.evandhardspace.yacca.presentation.SnackbarState
 import com.evandhardspace.yacca.presentation.login.LoginScreen
 import com.evandhardspace.yacca.ui.CurrencyCard
 import com.evandhardspace.yacca.utils.OnEffect
@@ -49,13 +50,8 @@ import com.evandhardspace.yacca.utils.pxAsDp
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-internal fun HomeRoute(
-    onSnackbarClick: (message: String, isError: Boolean) -> Unit,
-) {
-    HomeScreen(
-        onDisabledLikeClick = { onSnackbarClick("Login to add favourite currencies", false) },
-        onError = { message -> onSnackbarClick(message, true) }
-    ) { onLoggedIn ->
+internal fun HomeRoute() {
+    HomeScreen{ onLoggedIn ->
         LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             onLoggedIn = onLoggedIn,
@@ -67,18 +63,17 @@ internal fun HomeRoute(
 @Composable
 private fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
-    onDisabledLikeClick: () -> Unit,
-    onError: (String) -> Unit,
     authBottomSheetContent: @Composable (onLoggedIn: () -> Unit) -> Unit,
 ) {
     val uiState by viewModel.viewState.collectAsStateWithLifecycle()
 
     OnEffect(viewModel.effect) { effect ->
-        when (effect) {
-            is HomeScreenEffect.UnableToAdd -> onError("Unable to add to favourites.")
-            is HomeScreenEffect.UnableToDelete -> onError("Unable to delete from favourites.")
-            is HomeScreenEffect.UnableToUpdate -> onError("Unable to update currencies.")
+        val (message, snackbarState) = when (effect) {
+            is HomeScreenEffect.UnableToAdd -> "Unable to add to favourites." to SnackbarState.Error
+            is HomeScreenEffect.UnableToDelete ->"Unable to delete from favourites." to SnackbarState.Error
+            is HomeScreenEffect.UnableToUpdate -> "Unable to update currencies." to SnackbarState.Error
         }
+        viewModel.sendSnackbar(message, snackbarState)
     }
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -114,7 +109,7 @@ private fun HomeScreen(
                     currencyState = currencyState,
                     isUserLogged = uiState.isUserLoggedIn,
                     onLikeClick = viewModel::onLike, // todo rearrange composable
-                    onDisabledLikeClick = onDisabledLikeClick,
+                    onDisabledLikeClick = { viewModel.sendSnackbar("Login to add favourite currencies", SnackbarState.General)},
                     topContent = (@Composable { Spacer(Modifier.height(authSectionHeight.pxAsDp + 8.dp)) })
                         .takeUnless { uiState.isUserLoggedIn },
                     modifier = Modifier
@@ -206,23 +201,21 @@ private fun AuthSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Text message
             Text(
                 text = "Please sign in to access more features.",
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f) // Take available space before the button
+                modifier = Modifier.weight(1f)
             )
 
-            // Button with flexible width
             Button(
                 onClick = onShowAuth,
-                modifier = Modifier.padding(start = 8.dp) // Add spacing from the text
+                modifier = Modifier.padding(start = 8.dp)
             ) {
                 Text(
                     text = "Sign in",
                     style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1, // Prevent infinite line wrapping
-                    overflow = TextOverflow.Ellipsis // Handle any overflow
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
