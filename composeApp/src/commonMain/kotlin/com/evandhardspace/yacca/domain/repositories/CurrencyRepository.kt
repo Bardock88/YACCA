@@ -8,8 +8,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import org.lighthousegames.logging.logging
 
 internal class CurrencyRepository(
     private val currencyDataSource: CurrencyDataSource,
@@ -19,6 +19,11 @@ internal class CurrencyRepository(
 
     fun allCurrencies(): Flow<List<Currency>> =
         localCurrenciesDataSource.allCurrencies()
+
+    fun favouriteCurrencies(): Flow<List<Currency>> =
+        localCurrenciesDataSource
+            .allCurrencies()
+            .map { it.filter { currency -> currency.isFavourite } }
 
     // todo
     suspend fun fetchCurrencies(): Result<Unit> =

@@ -42,7 +42,8 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.evandhardspace.yacca.presentation.SnackbarState
+import com.evandhardspace.yacca.presentation.errorSnackbar
+import com.evandhardspace.yacca.presentation.generalSnackbar
 import com.evandhardspace.yacca.presentation.login.LoginScreen
 import com.evandhardspace.yacca.ui.CurrencyCard
 import com.evandhardspace.yacca.utils.OnEffect
@@ -68,12 +69,12 @@ private fun HomeScreen(
     val uiState by viewModel.viewState.collectAsStateWithLifecycle()
 
     OnEffect(viewModel.effect) { effect ->
-        val (message, snackbarState) = when (effect) {
-            is HomeScreenEffect.UnableToAdd -> "Unable to add to favourites." to SnackbarState.Error
-            is HomeScreenEffect.UnableToDelete ->"Unable to delete from favourites." to SnackbarState.Error
-            is HomeScreenEffect.UnableToUpdate -> "Unable to update currencies." to SnackbarState.Error
+        val message = when (effect) {
+            is HomeScreenEffect.UnableToAdd -> "Unable to add to favourites."
+            is HomeScreenEffect.UnableToDelete ->"Unable to delete from favourites."
+            is HomeScreenEffect.UnableToUpdate -> "Unable to update currencies."
         }
-        viewModel.sendSnackbar(message, snackbarState)
+        viewModel.sendSnackbar(errorSnackbar(message))
     }
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -108,8 +109,8 @@ private fun HomeScreen(
                 is CurrencyState.CurrencyLoaded -> CurrencyContent(
                     currencyState = currencyState,
                     isUserLogged = uiState.isUserLoggedIn,
-                    onLikeClick = viewModel::onLike, // todo rearrange composable
-                    onDisabledLikeClick = { viewModel.sendSnackbar("Login to add favourite currencies", SnackbarState.General)},
+                    onLikeClick = viewModel::onLike,
+                    onDisabledLikeClick = { viewModel.sendSnackbar(generalSnackbar("Login to add favourite currencies")) },
                     topContent = (@Composable { Spacer(Modifier.height(authSectionHeight.pxAsDp + 8.dp)) })
                         .takeUnless { uiState.isUserLoggedIn },
                     modifier = Modifier

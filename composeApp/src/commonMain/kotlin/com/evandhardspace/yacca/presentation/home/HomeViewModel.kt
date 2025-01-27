@@ -50,15 +50,9 @@ internal class HomeViewModel(
         }
     }
 
-    fun sendSnackbar(message: String, effect: SnackbarState) {
+    fun sendSnackbar(effect: SnackbarEffect) {
         viewModelScope.launch {
-            snackbarChannel.send(
-                when (effect) {
-                    SnackbarState.Error -> SnackbarEffect.Error(message)
-                    SnackbarState.General -> SnackbarEffect.General(message)
-                    SnackbarState.Success -> SnackbarEffect.Success(message)
-                }
-            )
+            snackbarChannel.send(effect)
         }
     }
 

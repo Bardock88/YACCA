@@ -68,3 +68,12 @@ internal sealed interface AppEffect : Effect {
 internal enum class SnackbarState {
     Error, General, Success,
 }
+
+internal fun generalSnackbar(message: String): AppEffect.SnackbarEffect.General =
+    AppEffect.SnackbarEffect.General(message)
+
+internal fun errorSnackbar(message: String): AppEffect.SnackbarEffect.Error =
+    AppEffect.SnackbarEffect.Error(message)
+
+internal fun successSnackbar(message: String): AppEffect.SnackbarEffect.Success =
+    AppEffect.SnackbarEffect.Success(message)
