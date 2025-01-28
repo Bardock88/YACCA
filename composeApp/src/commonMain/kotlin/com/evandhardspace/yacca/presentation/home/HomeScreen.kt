@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.evandhardspace.yacca.presentation.errorSnackbar
 import com.evandhardspace.yacca.presentation.generalSnackbar
 import com.evandhardspace.yacca.presentation.login.LoginScreen
+import com.evandhardspace.yacca.presentation.successSnackbar
 import com.evandhardspace.yacca.ui.CurrencyCard
 import com.evandhardspace.yacca.utils.OnEffect
 import com.evandhardspace.yacca.utils.pxAsDp
@@ -69,12 +70,14 @@ private fun HomeScreen(
     val uiState by viewModel.viewState.collectAsStateWithLifecycle()
 
     OnEffect(viewModel.effect) { effect ->
-        val message = when (effect) {
-            is HomeScreenEffect.UnableToAdd -> "Unable to add to favourites."
-            is HomeScreenEffect.UnableToDelete ->"Unable to delete from favourites."
-            is HomeScreenEffect.UnableToUpdate -> "Unable to update currencies."
+        val snackbar = when (effect) {
+            is HomeScreenEffect.UnableToAdd -> errorSnackbar("Unable to add to favourites.")
+            is HomeScreenEffect.UnableToDelete -> errorSnackbar("Unable to delete from favourites.")
+            is HomeScreenEffect.UnableToUpdate -> errorSnackbar("Unable to update currencies.")
+            is HomeScreenEffect.NetworkStateChanged -> if(effect.isNetworkAvailable) successSnackbar("Network connection is available")
+                else errorSnackbar("No network connection")
         }
-        viewModel.sendSnackbar(errorSnackbar(message))
+        viewModel.sendSnackbar(snackbar)
     }
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -164,6 +167,15 @@ private fun CurrencyContent(
     topContent: @Composable (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
+    if(currencyState.currencies.isEmpty()) {
+        Box(modifier) {
+            Text(
+                modifier = Modifier.align(Alignment.Center),
+                text = "No currencies available",
+            )
+        }
+        return
+    }
     LazyColumn(
         modifier = modifier
             .fillMaxSize(),

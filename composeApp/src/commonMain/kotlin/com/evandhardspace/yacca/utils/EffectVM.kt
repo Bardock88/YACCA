@@ -2,7 +2,10 @@ package com.evandhardspace.yacca.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -33,5 +36,14 @@ internal abstract class EffectViewModel<E : Effect> : ViewModel(), EffectHolder<
 }
 
 @Composable
-fun <E : Effect> OnEffect(effect: Flow<E>, onEffect: suspend (E) -> Unit): Unit =
-    LaunchedEffect(Unit) { effect.collect(onEffect) }
+fun <E : Effect> OnEffect(effect: Flow<E>, onEffect: suspend (E) -> Unit) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(effect, lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            effect.collect { event ->
+                onEffect(event)
+            }
+        }
+    }
+}

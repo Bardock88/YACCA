@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
 import com.evandhardspace.yacca.effecthandler.SessionEffectHandler
 import com.evandhardspace.yacca.effecthandler.SnackbarHandler
@@ -65,7 +66,7 @@ internal fun AppSnackbar(
     val (containerColor, contentColor) = when (state) {
         SnackbarState.Error -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onBackground
         SnackbarState.General -> SnackbarDefaults.color to SnackbarDefaults.contentColor
-        SnackbarState.Success -> SnackbarDefaults.color to SnackbarDefaults.contentColor
+        SnackbarState.Success -> Color(0xFFDFF7DF) to Color(0xFF004D00) // todo extract colors
     }
     Snackbar(
         modifier = modifier,

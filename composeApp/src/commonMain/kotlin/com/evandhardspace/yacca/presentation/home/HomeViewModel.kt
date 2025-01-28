@@ -8,9 +8,11 @@ import com.evandhardspace.yacca.presentation.AppEffect.*
 import com.evandhardspace.yacca.presentation.SnackbarSendChannel
 import com.evandhardspace.yacca.presentation.SnackbarState
 import com.evandhardspace.yacca.utils.EffectViewModel
+import com.evandhardspace.yacca.utils.NetworkMonitor
 import com.evandhardspace.yacca.utils.formatToNDecimalPlaces
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -21,6 +23,7 @@ internal class HomeViewModel(
     private val currencyRepository: CurrencyRepository,
     userRepository: UserRepository,
     private val snackbarChannel: SnackbarSendChannel,
+    networkMonitor: NetworkMonitor,
 ) : EffectViewModel<HomeScreenEffect>() {
 
     private val _viewState = MutableStateFlow(
@@ -48,6 +51,11 @@ internal class HomeViewModel(
         viewModelScope.launch {
             currencyRepository.fetchCurrencies()
         }
+        networkMonitor
+            .isConnected
+            .drop(1)
+            .onEach { HomeScreenEffect.NetworkStateChanged(it).send() }
+            .launchIn(viewModelScope)
     }
 
     fun sendSnackbar(effect: SnackbarEffect) {

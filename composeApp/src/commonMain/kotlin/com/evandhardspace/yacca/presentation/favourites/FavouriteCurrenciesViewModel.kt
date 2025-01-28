@@ -10,6 +10,7 @@ import com.evandhardspace.yacca.presentation.home.CurrencyState
 import com.evandhardspace.yacca.presentation.home.CurrencyUi
 import com.evandhardspace.yacca.utils.Effect
 import com.evandhardspace.yacca.utils.EffectViewModel
+import com.evandhardspace.yacca.utils.NetworkMonitor
 import com.evandhardspace.yacca.utils.formatToNDecimalPlaces
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -18,6 +19,7 @@ internal class FavouriteCurrenciesViewModel(
     private val cleanUpManager: CleanUpManager,
     private val currencyRepository: CurrencyRepository,
     private val snackbarSendChannel: SnackbarSendChannel,
+    networkMonitor: NetworkMonitor
 ) : EffectViewModel<FavouriteCurrenciesEffect>() {
 
     private val _viewState = MutableStateFlow<CurrencyState>(CurrencyState.Loading)
@@ -31,6 +33,11 @@ internal class FavouriteCurrenciesViewModel(
         viewModelScope.launch {
             currencyRepository.fetchCurrencies()
         }
+        networkMonitor
+            .isConnected
+            .drop(1)
+            .onEach { FavouriteCurrenciesEffect.NetworkStateChanged(it).send() }
+            .launchIn(viewModelScope)
     }
 
     fun refresh() {
@@ -75,6 +82,7 @@ internal sealed interface FavouriteCurrenciesEffect : Effect {
     data object LoggedOut : FavouriteCurrenciesEffect
     data object UnableToUpdate : FavouriteCurrenciesEffect
     data object UnableToDelete : FavouriteCurrenciesEffect
+    data class NetworkStateChanged(val isNetworkAvailable: Boolean) : FavouriteCurrenciesEffect
 }
 
 private fun List<Currency>.mapToCurrencyLoaded(): CurrencyState.CurrencyLoaded =

@@ -22,4 +22,5 @@ internal sealed interface HomeScreenEffect : Effect {
     data object UnableToUpdate : HomeScreenEffect
     data object UnableToAdd : HomeScreenEffect
     data object UnableToDelete : HomeScreenEffect
+    data class NetworkStateChanged(val isNetworkAvailable: Boolean): HomeScreenEffect
 }

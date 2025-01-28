@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.evandhardspace.yacca.presentation.errorSnackbar
 import com.evandhardspace.yacca.presentation.generalSnackbar
 import com.evandhardspace.yacca.presentation.home.CurrencyState
+import com.evandhardspace.yacca.presentation.successSnackbar
 import com.evandhardspace.yacca.ui.CurrencyCard
 import com.evandhardspace.yacca.utils.OnEffect
 import org.koin.compose.viewmodel.koinViewModel
@@ -55,8 +56,13 @@ private fun FavouriteCurrenciesScreenScreen(
                 viewModel.sendSnackbar(generalSnackbar("You are logged out."))
                 onLoggedOut()
             }
+
             FavouriteCurrenciesEffect.UnableToDelete -> viewModel.sendSnackbar(errorSnackbar("Unable to delete currency from favourite"))
             FavouriteCurrenciesEffect.UnableToUpdate -> viewModel.sendSnackbar(errorSnackbar("Unable to update favourite currencies"))
+            is FavouriteCurrenciesEffect.NetworkStateChanged -> viewModel.sendSnackbar(
+                if (effect.isNetworkAvailable) successSnackbar("Network connection is available")
+                else errorSnackbar("No network connection")
+            )
         }
     }
 
@@ -113,6 +119,15 @@ private fun CurrencyContent(
     onLikeClick: (currencyId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (currencyState.currencies.isEmpty()) {
+        Box(modifier) {
+            Text(
+                modifier = Modifier.align(Alignment.Center),
+                text = "You have no favourite currencies",
+            )
+        }
+        return
+    }
     LazyColumn(modifier.fillMaxSize()) {
         items(currencyState.currencies, key = { it.id }) { currency ->
             CurrencyCard(
