@@ -6,46 +6,45 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarData
+import androidx.compose.material3.SnackbarDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.rememberNavController
-import com.evandhardspace.yacca.domain.CleanUpManager
-import com.evandhardspace.yacca.presentation.SessionEffect
-import com.evandhardspace.yacca.presentation.SessionRepository
-import com.evandhardspace.yacca.utils.OnEffect
+import com.evandhardspace.yacca.effecthandler.SessionEffectHandler
+import com.evandhardspace.yacca.effecthandler.SnackbarHandler
+import com.evandhardspace.yacca.presentation.SnackbarState
 import com.evandhardspace.yacca.utils.di.YaccaApplication
 import com.evandhardspace.yacca.utils.navigation.NavigationHost
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.Job
-import org.koin.compose.koinInject
-
 
 @Composable
 fun App() = YaccaApplication {
-    val sessionRepository = koinInject<SessionRepository>()
-    val cleanUpManager = koinInject<CleanUpManager>()
     val navController = rememberNavController()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
-    var snackbarJob: Job? = remember { null }
+    val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+    var snackbarState: SnackbarState by remember { mutableStateOf(SnackbarState.General) }
 
-    OnEffect(sessionRepository.effect) { effect ->
-        when (effect) {
-            SessionEffect.UserIsSignedOut -> {
-                cleanUpManager.clear()
-                snackbarHostState.showSnackbar("Your credential expired, please sign in again.")
-            }
-        }
-    }
+    SessionEffectHandler()
+    SnackbarHandler(snackbarHostState) { newState -> snackbarState = newState }
+
     MaterialTheme {
 
         Scaffold(
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                ) { data ->
+                    AppSnackbar(
+                        data,
+                        snackbarState,
+                    )
+                }
+            },
             bottomBar = { BottomNavigationBar(navController) }
         ) { innerPaddings ->
             NavigationHost(
@@ -53,16 +52,26 @@ fun App() = YaccaApplication {
                     .consumeWindowInsets(WindowInsets.systemBars)
                     .padding(innerPaddings),
                 navController = navController,
-                showSnackbar = { message ->
-                    snackbarJob?.cancel()
-                    snackbarJob = coroutineScope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = message,
-                            duration = SnackbarDuration.Short
-                        )
-                    }
-                }
             )
         }
     }
+}
+
+@Composable
+internal fun AppSnackbar(
+    data: SnackbarData,
+    state: SnackbarState,
+    modifier: Modifier = Modifier,
+) {
+    val (containerColor, contentColor) = when (state) {
+        SnackbarState.Error -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onBackground
+        SnackbarState.General -> SnackbarDefaults.color to SnackbarDefaults.contentColor
+        SnackbarState.Success -> Color(0xFFDFF7DF) to Color(0xFF004D00) // todo extract colors
+    }
+    Snackbar(
+        modifier = modifier,
+        snackbarData = data,
+        containerColor = containerColor,
+        contentColor = contentColor,
+    )
 }

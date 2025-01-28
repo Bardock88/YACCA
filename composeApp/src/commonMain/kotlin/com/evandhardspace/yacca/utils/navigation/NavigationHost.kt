@@ -14,23 +14,17 @@ import com.evandhardspace.yacca.presentation.home.HomeRoute
 fun NavigationHost(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    showSnackbar: (message: String) -> Unit,
 ) = NavHost(
     modifier = modifier,
     navController = navController,
     startDestination = Screen.Home.route,
 ) {
     composable<Route.Home> {
-        HomeRoute(
-            noDisabledLikeClick = showSnackbar,
-        )
+        HomeRoute()
     }
     composable<Route.Favourites> {
         FavouritesRoute(
-            onLoggedOut = {
-                navController.navigateToHomeTab()
-                showSnackbar("You are logged out")
-            },
+            onLoggedOut = { navController.navigateToHomeTab() },
         )
     }
 }

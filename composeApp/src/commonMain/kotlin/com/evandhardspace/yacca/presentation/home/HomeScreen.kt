@@ -42,18 +42,30 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.evandhardspace.yacca.presentation.errorSnackbar
+import com.evandhardspace.yacca.presentation.generalSnackbar
 import com.evandhardspace.yacca.presentation.login.LoginScreen
+import com.evandhardspace.yacca.presentation.successSnackbar
 import com.evandhardspace.yacca.ui.CurrencyCard
+import com.evandhardspace.yacca.utils.OnEffect
 import com.evandhardspace.yacca.utils.pxAsDp
+import com.evandharpace.yacca.Res
+import com.evandharpace.yacca.network_ko
+import com.evandharpace.yacca.network_ok
+import com.evandharpace.yacca.no_currencies_available
+import com.evandharpace.yacca.refresh
+import com.evandharpace.yacca.sign_in
+import com.evandharpace.yacca.sign_in_to_access_more_features
+import com.evandharpace.yacca.sign_in_to_add_currencies
+import com.evandharpace.yacca.unable_to_add_to_favourites
+import com.evandharpace.yacca.unable_to_delete_from_favourites
+import com.evandharpace.yacca.unable_to_update_currencies
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-internal fun HomeRoute(
-    noDisabledLikeClick: (message: String) -> Unit,
-) {
-    HomeScreen(
-        onDisabledLikeClick = { noDisabledLikeClick("Login to add favourite currencies") },
-    ) { onLoggedIn ->
+internal fun HomeRoute() {
+    HomeScreen{ onLoggedIn ->
         LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             onLoggedIn = onLoggedIn,
@@ -65,10 +77,27 @@ internal fun HomeRoute(
 @Composable
 private fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
-    onDisabledLikeClick: () -> Unit,
     authBottomSheetContent: @Composable (onLoggedIn: () -> Unit) -> Unit,
 ) {
     val uiState by viewModel.viewState.collectAsStateWithLifecycle()
+
+    val unableToAddToFavouritesString = stringResource(Res.string.unable_to_add_to_favourites)
+    val unableToDeleteFromFavouritesString = stringResource(Res.string.unable_to_delete_from_favourites)
+    val unableToUpdateCurrenciesString = stringResource(Res.string.unable_to_update_currencies)
+    val networkOkString = stringResource(Res.string.network_ok)
+    val networkKoString = stringResource(Res.string.network_ko)
+    val signInToAddCurrenciesString = stringResource(Res.string.sign_in_to_add_currencies)
+
+    OnEffect(viewModel.effect) { effect ->
+        val snackbar = when (effect) {
+            is HomeScreenEffect.UnableToAdd -> errorSnackbar(unableToAddToFavouritesString)
+            is HomeScreenEffect.UnableToDelete -> errorSnackbar(unableToDeleteFromFavouritesString)
+            is HomeScreenEffect.UnableToUpdate -> errorSnackbar(unableToUpdateCurrenciesString)
+            is HomeScreenEffect.NetworkStateChanged -> if(effect.isNetworkAvailable) successSnackbar(networkOkString)
+                else errorSnackbar(networkKoString)
+        }
+        viewModel.sendSnackbar(snackbar)
+    }
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showAuthSheet by remember { mutableStateOf(false) }
@@ -89,7 +118,7 @@ private fun HomeScreen(
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = { viewModel.refresh() }) {
-                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                Icon(Icons.Default.Refresh, contentDescription = stringResource(Res.string.refresh))
             }
         }
     ) { paddingValues ->
@@ -102,22 +131,14 @@ private fun HomeScreen(
                 is CurrencyState.CurrencyLoaded -> CurrencyContent(
                     currencyState = currencyState,
                     isUserLogged = uiState.isUserLoggedIn,
-                    onLikeClick = viewModel::onLike, // todo rearrange composable
-                    onDisabledLikeClick = onDisabledLikeClick,
+                    onLikeClick = viewModel::onLike,
+                    onDisabledLikeClick = { viewModel.sendSnackbar(generalSnackbar(signInToAddCurrenciesString)) },
                     topContent = (@Composable { Spacer(Modifier.height(authSectionHeight.pxAsDp + 8.dp)) })
                         .takeUnless { uiState.isUserLoggedIn },
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
                 )
-
-                CurrencyState.Error -> Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text("Something went wrong.", color = MaterialTheme.colorScheme.error)
-                }
 
                 CurrencyState.Loading -> Box(
                     modifier = Modifier
@@ -157,6 +178,15 @@ private fun CurrencyContent(
     topContent: @Composable (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
+    if(currencyState.currencies.isEmpty()) {
+        Box(modifier) {
+            Text(
+                modifier = Modifier.align(Alignment.Center),
+                text = stringResource(Res.string.no_currencies_available),
+            )
+        }
+        return
+    }
     LazyColumn(
         modifier = modifier
             .fillMaxSize(),
@@ -195,23 +225,21 @@ private fun AuthSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Text message
             Text(
-                text = "Please sign in to access more features.",
+                text = stringResource(Res.string.sign_in_to_access_more_features),
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f) // Take available space before the button
+                modifier = Modifier.weight(1f)
             )
 
-            // Button with flexible width
             Button(
                 onClick = onShowAuth,
-                modifier = Modifier.padding(start = 8.dp) // Add spacing from the text
+                modifier = Modifier.padding(start = 8.dp)
             ) {
                 Text(
-                    text = "Sign in",
+                    text = stringResource(Res.string.sign_in),
                     style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1, // Prevent infinite line wrapping
-                    overflow = TextOverflow.Ellipsis // Handle any overflow
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

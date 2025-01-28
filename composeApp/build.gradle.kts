@@ -73,6 +73,12 @@ kotlin {
     }
 }
 
+compose.resources {
+    publicResClass = false
+    packageOfResClass = "com.evandharpace.yacca"
+    generateResClass = auto
+}
+
 android {
     namespace = "com.evandhardspace.yacca"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -83,6 +89,25 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
+        buildFeatures {
+            buildConfig = true
+        }
+
+        val properties = loadLocalProperties()
+
+        val isEmulatorLocalhost = properties["emulator.localhost"].toString().toBool()
+        buildConfigField("boolean", "isEmulatorLocalhost", isEmulatorLocalhost.toString())
+
+        val serverLocalPort = properties["server.localPort"]?.toString()?.toIntOrNull()
+            ?: if(isEmulatorLocalhost)
+                error("emulator.localhost is true but local property server.localPort is not set")
+            else 8080
+        buildConfigField("int", "serverLocalPort", serverLocalPort.toString())
+
+        val baseUrl = properties["server.host"]?.toString().takeUnless { it.isNullOrEmpty() }
+            ?: if(isEmulatorLocalhost) "" else error("emulator.localhost is false but local property server.host is not set")
+        buildConfigField("String", "baseUrl", "\"$baseUrl\"")
     }
     packaging {
         resources {

@@ -2,7 +2,10 @@ package com.evandhardspace.yacca.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
@@ -11,14 +14,18 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
 
-interface Effect
+internal interface Effect
 
-abstract class EffectViewModel<E : Effect> : ViewModel() {
+internal interface EffectHolder<out E: Effect> {
+    val effect: Flow<E>
+}
+
+internal abstract class EffectViewModel<E : Effect> : ViewModel(), EffectHolder<E> {
     private val _effect = Channel<E>(
         capacity = Channel.BUFFERED,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
-    val effect: Flow<E> = _effect
+    override val effect: Flow<E> = _effect
         .receiveAsFlow()
         .shareIn(
             scope = viewModelScope,
@@ -29,5 +36,14 @@ abstract class EffectViewModel<E : Effect> : ViewModel() {
 }
 
 @Composable
-fun <E : Effect> OnEffect(effect: Flow<E>, onEffect: suspend (E) -> Unit): Unit =
-    LaunchedEffect(Unit) { effect.collect(onEffect) }
+fun <E : Effect> OnEffect(effect: Flow<E>, onEffect: suspend (E) -> Unit) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(effect, lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            effect.collect { event ->
+                onEffect(event)
+            }
+        }
+    }
+}

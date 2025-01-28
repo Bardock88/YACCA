@@ -20,6 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.evandhardspace.yacca.presentation.home.CurrencyUi
+import com.evandharpace.yacca.Res
+import com.evandharpace.yacca.favourite_disabled
+import com.evandharpace.yacca.price
+import com.evandharpace.yacca.symbol
+import com.evandharpace.yacca.toggle_favourites
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun CurrencyCard(
@@ -49,12 +55,12 @@ internal fun CurrencyCard(
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    text = "Symbol: ${currency.symbol}",
+                    text = "${stringResource(Res.string.symbol)}: ${currency.symbol}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Price: ${currency.price}",
+                    text = "${stringResource(Res.string.price)}: ${currency.price}",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -62,14 +68,14 @@ internal fun CurrencyCard(
             if (isLikeEnabled) IconButton(onClick = { onLikeClick(currency) }) {
                 Icon(
                     imageVector = if (currency.isFavourite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Toggle Favourite",
+                    contentDescription = stringResource(Res.string.toggle_favourites),
                     tint = if (currency.isFavourite) Color.Red else MaterialTheme.colorScheme.onSurface
                 )
             }
             else IconButton(onClick = onDisabledLikeClick) {
                 Icon(
                     imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = "Favourite Disabled",
+                    contentDescription = stringResource(Res.string.favourite_disabled),
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
             }
