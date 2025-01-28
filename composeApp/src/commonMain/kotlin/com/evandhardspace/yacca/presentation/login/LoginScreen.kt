@@ -26,6 +26,20 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.evandhardspace.yacca.utils.OnEffect
+import com.evandharpace.yacca.Res
+import com.evandharpace.yacca.already_have_account
+import com.evandharpace.yacca.confirm_password
+import com.evandharpace.yacca.create_account
+import com.evandharpace.yacca.dont_have_account
+import com.evandharpace.yacca.email
+import com.evandharpace.yacca.email_cannot_be_blank
+import com.evandharpace.yacca.password
+import com.evandharpace.yacca.password_dont_match
+import com.evandharpace.yacca.short_password
+import com.evandharpace.yacca.sign_in
+import com.evandharpace.yacca.sign_up
+import com.evandharpace.yacca.unknown_error
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -69,7 +83,7 @@ private fun SignInSignUpContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = if (state.isSignUpFlow) "Sign Up" else "Sign In",
+            text = stringResource(if (state.isSignUpFlow) Res.string.sign_up else Res.string.sign_in),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -77,7 +91,7 @@ private fun SignInSignUpContent(
         OutlinedTextField(
             value = state.email,
             onValueChange = onEmailChanged,
-            label = { Text("Email") },
+            label = { Text(stringResource(Res.string.email)) },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
@@ -90,7 +104,7 @@ private fun SignInSignUpContent(
         OutlinedTextField(
             value = state.password,
             onValueChange = onPasswordChanged,
-            label = { Text("Password") },
+            label = { Text(stringResource(Res.string.password)) },
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Password,
                 imeAction = if (state.isSignUpFlow) ImeAction.Next else ImeAction.Done
@@ -103,7 +117,7 @@ private fun SignInSignUpContent(
             OutlinedTextField(
                 value = state.confirmPassword,
                 onValueChange = onConfirmPasswordChanged,
-                label = { Text("Confirm Password") },
+                label = { Text(stringResource(Res.string.confirm_password)) },
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done
@@ -117,9 +131,9 @@ private fun SignInSignUpContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (state.errorMessage != null) {
+        if (state.error != null) {
             Text(
-                text = state.errorMessage,
+                text = state.error.asString(),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -129,19 +143,19 @@ private fun SignInSignUpContent(
         Button(
             onClick = onSubmit,
             modifier = Modifier.fillMaxWidth(),
-            enabled = state.isLoading.not() && (state.errorMessage == null) && state.isDataFilled
+            enabled = state.isLoading.not() && (state.error == null) && state.isDataFilled
         ) {
             if (state.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.size(18.dp), color = Color.White)
             } else {
-                Text(text = if (state.isSignUpFlow) "Create Account" else "Log In")
+                Text(text = stringResource(if (state.isSignUpFlow) Res.string.create_account else Res.string.sign_in))
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = if (state.isSignUpFlow) "Already have an account? Sign in" else "Don't have an account? Sign up",
+            text = stringResource(if (state.isSignUpFlow) Res.string.already_have_account else Res.string.dont_have_account),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.clickable(onClick = onToggleLoginFlow)
@@ -149,3 +163,10 @@ private fun SignInSignUpContent(
     }
 }
 
+@Composable
+private fun LoginError.asString(): String = when(this) {
+    LoginError.BlankEmail -> Res.string.email_cannot_be_blank
+    LoginError.PasswordShort -> Res.string.short_password
+    LoginError.PasswordDontMatch -> Res.string.password_dont_match
+    LoginError.Unknown -> Res.string.unknown_error
+}.let { stringResource(it) }

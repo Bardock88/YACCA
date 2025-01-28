@@ -1,0 +1,33 @@
+<resources>
+    <string name="email_cannot_be_blank">Email cannot be blank</string>
+    <string name="short_password">Password must be at least 8 characters long</string>
+    <string name="password_dont_match">Passwords do not match</string>
+    <string name="unknown_error">Unknown error occurred</string>
+    <string name="sign_in">Sing in</string>
+    <string name="sign_up">Sing up</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="create_account">Create account</string>
+    <string name="already_have_account">Already have an account? Sign in</string>
+    <string name="dont_have_account">Don't have an account? Sign up</string>
+    <string name="unable_to_add_to_favourites">Unable to add to favourites.</string>
+    <string name="unable_to_delete_from_favourites">Unable to delete from favourites.</string>
+    <string name="unable_to_update_currencies">Unable to update currencies.</string>
+    <string name="unable_to_update_favourite_currencies">Unable to update favourite currencies</string>
+    <string name="network_ok">Network connection is available.</string>
+    <string name="network_ko">No network connection.</string>
+    <string name="refresh">Refresh</string>
+    <string name="sign_in_to_add_currencies">Sign in to add favourite currencies.</string>
+    <string name="no_currencies_available">No currencies available</string>
+    <string name="sign_in_to_access_more_features">Please sign in to access more features.</string>
+    <string name="home">Home</string>
+    <string name="favourites">Favourites</string>
+    <string name="you_are_logged_out">You are logged out.</string>
+    <string name="sign_out">Sign out</string>
+    <string name="you_have_no_favourite_currencies">You have no favourite currencies</string>
+    <string name="symbol">Symbol</string>
+    <string name="price">Price</string>
+    <string name="toggle_favourites">Toggle Favourite</string>
+    <string name="favourite_disabled">Favourite Disabled</string>
+</resources>

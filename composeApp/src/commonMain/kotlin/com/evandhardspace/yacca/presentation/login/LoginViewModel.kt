@@ -24,12 +24,12 @@ internal class LoginViewModel(
 
     fun onPasswordChanged(newPassword: String) {
         _viewState.update { it.copy(password = newPassword) }
-        validatePasswords()
+        validateInputs()
     }
 
     fun onConfirmPasswordChanged(newConfirmPassword: String) {
         _viewState.update { it.copy(confirmPassword = newConfirmPassword) }
-        validatePasswords()
+        validateInputs()
     }
 
     fun toggleLoginFlow() {
@@ -37,17 +37,17 @@ internal class LoginViewModel(
             it.copy(
                 isSignUpFlow = !it.isSignUpFlow,
                 confirmPassword = "",
-                errorMessage = null,
+                error = null,
             )
         }
-        validatePasswords()
+        validateInputs()
     }
 
     fun onSubmit() {
         val currentState = _viewState.value
-        if (validatePasswords().not()) return
+        if (validateInputs().not()) return
 
-        _viewState.update { it.copy(isLoading = true, errorMessage = null) }
+        _viewState.update { it.copy(isLoading = true, error = null) }
 
         viewModelScope.launch {
             val result = if (currentState.isSignUpFlow) authRepository.signUp(
@@ -67,7 +67,7 @@ internal class LoginViewModel(
                     _viewState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = error.message ?: "An unknown error occurred"
+                            error = LoginError.Unknown
                         )
                     }
                 }
@@ -75,23 +75,29 @@ internal class LoginViewModel(
         }
     }
 
-    // todo check
-    private fun validatePasswords(): Boolean {
-        var isValid = false
-        _viewState.update { currentState ->
-            val isPasswordValid = if (currentState.isSignUpFlow) {
-                currentState.password.length >= 8 && currentState.password == currentState.confirmPassword
-            } else {
-                currentState.password.length >= 8
-            }
-            if (isPasswordValid.not()) {
-                currentState.copy(errorMessage = "Passwords are invalid")
-            } else {
-                isValid = true
-                currentState.copy(errorMessage = null)
-            }
+    private fun validateInputs(): Boolean {
+        val currentState = _viewState.value
+
+        val emailError = if (currentState.email.isBlank()) {
+            LoginError.BlankEmail
+        } else null
+
+        val passwordError = if (currentState.password.length < 8) {
+            LoginError.PasswordShort
+        } else null
+
+        val confirmPasswordError =
+            if (currentState.isSignUpFlow && currentState.password != currentState.confirmPassword) {
+                LoginError.PasswordDontMatch
+            } else null
+
+        val error = emailError ?: passwordError ?: confirmPasswordError
+
+        _viewState.update {
+            it.copy(error = error)
         }
-        return isValid
+
+        return error == null
     }
 
     private suspend fun login() {
@@ -111,9 +117,16 @@ internal data class LoginState(
     val confirmPassword: String = "",
     val isSignUpFlow: Boolean = false,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    val error: LoginError? = null,
     val success: Boolean = false
 )
+
+internal enum class LoginError {
+    BlankEmail,
+    PasswordShort,
+    PasswordDontMatch,
+    Unknown,
+}
 
 internal val LoginState.isDataFilled: Boolean
     get() = if (isSignUpFlow) {
