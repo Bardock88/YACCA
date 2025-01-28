@@ -116,12 +116,9 @@ JWT_SECRET=<jwt_access_token_secret>
 
 ### Planned Improvements
 - **Mobile:**
-  - Is network-enabled detection
   - Pull to refresh
-  - Proper error-handling
   - Testing
   - Logging
-  - Localization
   - Theming
   - Ui improvements
 - **Server:**

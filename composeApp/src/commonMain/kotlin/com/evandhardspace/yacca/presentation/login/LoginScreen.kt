@@ -33,6 +33,7 @@ import com.evandharpace.yacca.create_account
 import com.evandharpace.yacca.dont_have_account
 import com.evandharpace.yacca.email
 import com.evandharpace.yacca.email_cannot_be_blank
+import com.evandharpace.yacca.no_such_user
 import com.evandharpace.yacca.password
 import com.evandharpace.yacca.password_dont_match
 import com.evandharpace.yacca.short_password
@@ -169,4 +170,5 @@ private fun LoginError.asString(): String = when(this) {
     LoginError.PasswordShort -> Res.string.short_password
     LoginError.PasswordDontMatch -> Res.string.password_dont_match
     LoginError.Unknown -> Res.string.unknown_error
+    LoginError.NoSuchUser -> Res.string.no_such_user
 }.let { stringResource(it) }

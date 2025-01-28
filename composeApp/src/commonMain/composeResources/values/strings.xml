@@ -30,4 +30,5 @@
     <string name="price">Price</string>
     <string name="toggle_favourites">Toggle Favourite</string>
     <string name="favourite_disabled">Favourite Disabled</string>
+    <string name="no_such_user">Incorrect email or password</string>
 </resources>
