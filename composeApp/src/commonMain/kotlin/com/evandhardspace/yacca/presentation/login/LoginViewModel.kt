@@ -63,11 +63,11 @@ internal class LoginViewModel(
                     _viewState.update { it.copy(isLoading = false, success = true) }
                     login()
                 },
-                onFailure = { error ->
+                onFailure = {
                     _viewState.update {
                         it.copy(
                             isLoading = false,
-                            error = LoginError.Unknown
+                            error = LoginError.NoSuchUser
                         )
                     }
                 }
@@ -125,6 +125,7 @@ internal enum class LoginError {
     BlankEmail,
     PasswordShort,
     PasswordDontMatch,
+    NoSuchUser,
     Unknown,
 }
 
