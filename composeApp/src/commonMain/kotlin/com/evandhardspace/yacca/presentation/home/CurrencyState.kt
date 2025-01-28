@@ -14,8 +14,6 @@ internal sealed interface CurrencyState {
     data class CurrencyLoaded(
         val currencies: List<CurrencyUi>,
     ) : CurrencyState
-
-    data object Error : CurrencyState
 }
 
 internal sealed interface HomeScreenEffect : Effect {
